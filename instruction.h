@@ -1,5 +1,8 @@
-#include <functional>
+#ifndef INSTRUCTION_H
+#define INSTRUCTION_H
+
 #include <string>
+#include "instruction_args.h"
 
 class CPU;
 template <typename T>
@@ -10,38 +13,6 @@ typedef unsigned char uchar;
 template <typename T>
 using ParamOnCall = void(*)(ParamInstruction<T> &instruction);
 using NoParamOnCall = void(*)(NoParamInstruction &instruction);
-
-/*******************************
-*******Instruction Params*******
-********************************/
-struct Reg8Reg8Param
-{
-	uchar &regA;
-	uchar &regB;
-
-	Reg8Reg8Param(uchar &regA, uchar &regB) :
-		regA(regA),
-		regB(regB)
-	{ }
-};
-
-// comp reg16, imm16
-
-// comp reg16, reg8
-
-// reg8
-
-// reg8, imm8
-
-// imm16, reg16
-
-// comp reg16, comp reg16
-
-// reg8, comp reg16
-
-// reg16
-
-// imm16
 
 /*******************************
 **********Instruction***********
@@ -59,8 +30,8 @@ protected:
 	std::string mnemonic;
 	// affects memory?
 	// flags affected?
-	int size;		// in bytes
-	int duration;	// in cpu cycles
+	uchar size;			// in bytes
+	uchar duration;		// in cpu cycles
 	CPU *processor;
 };
 
@@ -84,7 +55,7 @@ private:
 template <typename T>
 class ParamInstruction : public Instruction
 {
-	friend Instruction *MakeInstruction(CPU *processor);
+	friend void LoadCReg16Imm16(ParamInstruction<CReg16Param> &instruction);
 public:
 	ParamInstruction(CPU *processor, std::string mnemonic,
 		int size, int duration, T params, ParamOnCall<T> onCall);
@@ -94,3 +65,23 @@ private:
 	T params;
 	ParamOnCall<T> onCall;
 };
+
+// ParamInstruction implementation
+template <typename T>
+ParamInstruction<T>::ParamInstruction(CPU *processor, std::string mnemonic,
+	int size, int duration, T params, ParamOnCall<T> onCall) :
+	Instruction(processor, mnemonic, size, duration),
+	params(params),
+	onCall(onCall)
+{
+
+}
+
+template <typename T>
+void ParamInstruction<T>::Call()
+{
+	onCall(*this);
+	Instruction::Call();
+}
+
+#endif

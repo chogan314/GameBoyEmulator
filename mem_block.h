@@ -1,4 +1,5 @@
-#include <functional>
+#ifndef MEM_BLOCK_H
+#define MEM_BLOCK_H
 
 typedef unsigned long ulong;
 typedef unsigned short ushort;
@@ -24,3 +25,5 @@ private:
 	ulong size;		// max size = 2^34 bytes
 	uchar *memory;
 };
+
+#endif

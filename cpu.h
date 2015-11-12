@@ -1,14 +1,29 @@
+#ifndef CPU_H
+#define CPU_H
+
+#include "mem_block.h"
+#include "instruction_args.h"
+
 typedef unsigned short ushort;
 typedef unsigned char uchar;
 
 class Instruction;
+template <typename T>
+class ParamInstruction;
+class NoParamInstruction;
 
 class CPU
 {
 	friend class Instruction;
-	friend Instruction *MakeInstruction(CPU *processor);
+	friend class InstructionFactory;
+
+	friend void LoadCReg16Imm16(ParamInstruction<CReg16Param> &instruction);
 public:
 	CPU();
+
+	~CPU();
+
+	void InvokeInstruction(int index);
 private:
 	uchar A;		// accumulator
 	uchar F;		// flags [Zero][Subtract][Half Carry][Carry][0][0][0][0]
@@ -26,4 +41,12 @@ private:
 
 	ushort SP;		// stack pointer
 	ushort PC;		// program counter
+
+	bool instructionExtenderFlag;
+
+	Instruction *instructions[512];
+
+	MemBlock *memory;
 };
+
+#endif

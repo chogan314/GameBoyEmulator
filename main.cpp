@@ -1,5 +1,6 @@
 #include <iostream>
 #include "mem_block.h"
+#include "cpu.h"
 
 typedef unsigned long ulong;
 typedef unsigned short ushort;
@@ -38,12 +39,8 @@ inline HexUshortStruct hex(ushort s)
 
 int main()
 {
-	MemBlock memory(8);
-	memory.WriteByte(0, 0xab);
-	memory.WriteShort(1, 0x1234);
+	CPU processor;
+	processor.InvokeInstruction(1);
 
-	char val = memory.ReadByte(0);
-
-	std::cout << hex(val) << std::endl;
-	//std::cout << hex(memory.ReadShort(1)) << std::endl;
+	std::cout << ":SKDJLFSDKJL" << std::endl;
 }
