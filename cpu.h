@@ -16,8 +16,6 @@ class CPU
 {
 	friend class Instruction;
 	friend class InstructionFactory;
-
-	friend void LoadCReg16Imm16(ParamInstruction<CReg16Param> &instruction);
 public:
 	CPU();
 

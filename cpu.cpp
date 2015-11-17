@@ -16,7 +16,6 @@ CPU::CPU() :
 	instructionExtenderFlag(false)
 {
 	InstructionFactory factory(this);
-	instructions[1] = factory.MakeOp0x01();
 }
 
 CPU::~CPU()

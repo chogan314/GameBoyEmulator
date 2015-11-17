@@ -55,7 +55,6 @@ private:
 template <typename T>
 class ParamInstruction : public Instruction
 {
-	friend void LoadCReg16Imm16(ParamInstruction<CReg16Param> &instruction);
 public:
 	ParamInstruction(CPU *processor, std::string mnemonic,
 		int size, int duration, T params, ParamOnCall<T> onCall);

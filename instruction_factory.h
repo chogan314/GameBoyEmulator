@@ -9,198 +9,100 @@ class InstructionFactory
 public:
 	InstructionFactory(CPU *processor);
 
-	// NOP
-	Instruction *MakeOp0x00();
+	// MAKE: LD reg16, imm16
+	void MakeLoadReg16Imm16(uchar &msb, uchar &lsb);
 
-	// LD BC, d16
-	Instruction *MakeOp0x01();
+	// MAKE: LD (reg16), reg8
+	void MakeLoadAddrReg16Reg8(uchar &msb, uchar &lsb, uchar &reg8);
 
-	// LD (BC), A
-	Instruction *MakeOp0x02();
+	// MAKE: INC reg16
+	void MakeIncReg16(uchar &msb, uchar &lsb);
 
-	// INC BC
-	Instruction *MakeOp0x03();
+	// MAKE: INC reg8
+	void MakeIncReg8(uchar &reg);
 
-	// INC B
-	Instruction *MakeOp0x04();
+	// MAKE: DEC reg8
+	void MakeDecReg8(uchar &reg);
 
-	// DEC B
-	Instruction *MakeOp0x05();
+	// MAKE: LD reg8, imm8
+	void MakeLoadReg8Imm8(uchar &reg);
 
-	// LD B, d8
-	Instruction *MakeOp0x06();
+	// MAKE: LD (imm16), reg16
+	void MakeLoadAddrImm16Reg16(ushort &reg);
 
-	// RLCA
-	Instruction *MakeOp0x07();
+	// MAKE: ADD reg16, reg16
+	void MakeAddReg16Reg16(uchar &lhsMsb, uchar &lhsLsb, uchar &rhsMsb, uchar &rhsLsb);
 
-	// LD (a16), SP
-	Instruction *MakeOp0x08();
+	// MAKE: LD reg8, (reg16)
+	void MakeLoadReg8AddrReg16(uchar &reg8, uchar &msb, uchar &lsb);
 
-	// ADD HL, BC
-	Instruction *MakeOp0x09();
+	// MAKE: DEC reg16
+	void MakeDecReg16(uchar &msb, uchar &lsb);
 
-	// LD A, (BC)
-	Instruction *MakeOp0x0A();
+	// MAKE: LD (reg16+), reg8
+	void MakeLDAddrIncCReg16Reg8(uchar &msb, uchar &lsb, uchar &reg8);
 
-	// DEC BC
-	Instruction *MakeOp0x0B();
+	// MAKE: LD reg8, (reg16+)
+	void MakeLDReg8AddrIncCReg16(uchar &reg8, uchar &msb, uchar &lsb);
 
-	// INC C
-	Instruction *MakeOp0x0C();
-
-	// DEC C
-	Instruction *MakeOp0x0D();
-
-	// LD C, d8
-	Instruction *MakeOp0x0E();
-
-	// RRCA
-	Instruction *MakeOp0x0F();
-
-	// STOP 0
-	Instruction *MakeOp0x10();
-
-	// LD DE, d16
-	Instruction *MakeOp0x11();
-
-	// LD (DE), A
-	Instruction *MakeOp0x12();
-
-	// INC DE
-	Instruction *MakeOp0x13();
-
-	// INC D
-	Instruction *MakeOp0x14();
-
-	// DEC D
-	Instruction *MakeOp0x15();
-
-	// LD D, d8
-	Instruction *MakeOp0x16();
-
-	// RLA
-	Instruction *MakeOp0x17();
-
-	// JR r8
-	Instruction *MakeOp0x18();
-
-	// ADD HL, DE
-	Instruction *MakeOp0x19();
-
-	// LD A, (DE)
-	Instruction *MakeOp0x1A();
-
-	// DEC DE
-	Instruction *MakeOp0x1B();
-
-	// INC E
-	Instruction *MakeOp0x1C();
-
-	// DEC E
-	Instruction *MakeOp0x1D();
-
-	// LD E, d8
-	Instruction *MakeOp0x1E();
-
-	// RRA
-	Instruction *MakeOp0x1F();
-
-	// JR NZ, r8
-	Instruction *MakeOp0x20();
-
-	// LD HL, d16
-	Instruction *MakeOp0x21();
-
-	// LD (HL+), A
-	Instruction *MakeOp0x22();
-
-	// INC HL
-	Instruction *MakeOp0x23();
-
-	// INC H
-	Instruction *MakeOp0x24();
-
-	// DEC H
-	Instruction *MakeOp0x25();
-
-	// LD H, d8
-	Instruction *MakeOp0x26();
-
-	// DAA
-	Instruction *MakeOp0x27();
-
-	// JR Z, r8
-	Instruction *MakeOp0x28();
-
-	// ADD HL, HL
-	Instruction *MakeOp0x29();
-
-	// LD A, (HL+)
-	Instruction *MakeOp0x2A();
-
-	// DEC HL
-	Instruction *MakeOp0x2B();
-
-	// INC L
-	Instruction *MakeOp0x2C();
-
-	// DEC L
-	Instruction *MakeOp0x2D();
-
-	// LD L, d8
-	Instruction *MakeOp0x2E();
-
-	// CPL
-	Instruction *MakeOp0x2F();
+	// MAKE: LD reg16, imm16
+	void MakeLDReg16Imm16(ushort &reg);
 private:
 	CPU *processor;
 };
 
-// LD cReg16, imm16
-// Load a 16-bit immediate value to a composite 16-bit register
-void LoadCReg16Imm16(ParamInstruction<CReg16Param> &instruction);
+// LD reg16, imm16
+void LoadReg16Imm16(ParamInstruction<Reg16Param> &instruction);
 
-// LD (cReg16), reg8
-// Load an 8-bit register to memory address pointed to by composite 16-bit register
-void LoadAddrCReg16Reg8(ParamInstruction<CReg16Reg8Param> &instruction);
+// LD reg16, reg8
+void LoadAddrReg16Reg8(ParamInstruction<Reg16Reg8Param> &instruction);
 
-// INC cReg16
-// Increment a composite 16-bit register
-void IncCReg16(ParamInstruction<CReg16Param> &instruction);
+// INC reg16
+void IncReg16(ParamInstruction<Reg16Param> &instruction);
 
 // INC reg8
-// Increment an 8-bit register
 void IncReg8(ParamInstruction<Reg8Param> &instruction);
 
 // DEC reg8
-// Decrement 8-bit register
 void DecReg8(ParamInstruction<Reg8Param> &instruction);
 
 // LD reg8, imm8
-// Load an 8-bit immediate value to an 8-bit register
 void LoadReg8Imm8(ParamInstruction<Reg8Param> &instruction);
 
 // LD (imm16), reg16
-// Load a 16-bit register to memory address represented by 16-bit immediate value
 void LoadAddrImm16Reg16(ParamInstruction<Reg16Param> &instruction);
 
-// ADD cReg16, cReg16
-// Add a composite 16-bit register to a composite 16-bit register
-void AddCReg16CReg16(ParamInstruction<CReg16CReg16Param> &instruction);
+// ADD reg16, reg16
+void AddReg16Reg16(ParamInstruction<Reg16Reg16Param> &instruction);
 
-// LD reg8, (cReg16)
-// Load value at memory address pointed to by composite 16-bit register to 8-bit regsiter
-void LoadReg8AddrCReg16(ParamInstruction<CReg16Reg8Param> &instruction);
+// LD reg8, (reg16)
+void LoadReg8AddrReg16(ParamInstruction<Reg16Reg8Param> &instruction);
 
-// DEC cReg16
-// Decrement composite 16-bit register
-void DecCReg16(ParamInstruction<CReg16Param> &instruction);
+// DEC reg16
+void DecReg16(ParamInstruction<Reg16Param> &instruction);
 
-// LD (cReg16+), reg8
-// Load an 8-bit register to address pointed to by a composite 16-bit register, then increment composite 16-bit register
-void LDAddrIncCReg16Reg8(ParamInstruction<CReg16Reg8Param> &instruction);
+// LD (reg16+), reg8
+void LDAddrIncReg16Reg8(ParamInstruction<Reg16Reg8Param> &instruction);
 
-// LD reg8, (cReg16+)
-void LDReg8AddrIncCReg16(ParamInstruction<CReg16Reg8Param> &instruction);
+// LD reg8, (reg16+)
+void LDReg8AddrIncReg16(ParamInstruction<Reg16Reg8Param> &instruction);
+
+// LD reg16, imm16
+void LDReg16Imm16(ParamInstruction<Reg16Param> &instruction);
+
+// LD (reg16-), reg8
+void LDAddrDecReg16Reg8(ParamInstruction<Reg16Reg8Param> &instruction);
+
+// INC (reg16)
+void IncAddrReg16(ParamInstruction<Reg16Param> &instruction);
+
+// DEC (reg16)
+void DecAddrReg16(ParamInstruction<Reg16Param> &instruction);
+
+// LD (reg16), imm8
+void LDAddrReg16Imm8(ParamInstruction<Reg16Param> &instruction);
+
+// ADD reg16, reg16
+void AddReg16Reg16(ParamInstruction<Reg16Reg16Param> &instruction);
 
 #endif

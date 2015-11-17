@@ -6,6 +6,16 @@
 typedef unsigned short ushort;
 typedef unsigned char uchar;
 
+// reg8
+struct Reg8Param
+{
+	uchar &reg;
+
+	Reg8Param(uchar &reg) :
+		reg(reg)
+	{ }
+};
+
 // reg8, reg8
 struct Reg8Reg8Param
 {
@@ -18,65 +28,54 @@ struct Reg8Reg8Param
 	{ }
 };
 
-// composite reg16
-struct CReg16Param
-{
-	CompositeRegister reg;
-
-	CReg16Param(uchar &msb, uchar &lsb) :
-		reg(msb, lsb)
-	{ }
-};
-
-// comp reg16, reg8
-struct CReg16Reg8Param
-{
-	CompositeRegister cReg16;
-	uchar &reg8;
-
-	CReg16Reg8Param(uchar &msb, uchar &lsb, uchar &reg8) :
-		cReg16(msb, lsb),
-		reg8(reg8)
-	{ }
-};
-
-// reg8
-struct Reg8Param
-{
-	uchar &reg;
-
-	Reg8Param(uchar &reg) :
-		reg(reg)
-	{ }
-};
-
-// reg8, imm8
-
-// imm16, reg16
-
-// comp reg16, comp reg16
-struct CReg16CReg16Param
-{
-	CompositeRegister lhs;
-	CompositeRegister rhs;
-
-	CReg16CReg16Param(uchar &lhsMsb, uchar &lhsLsb, uchar &rhsMsb, uchar &rhsLsb) :
-		lhs(lhsMsb, lhsLsb),
-		rhs(rhsMsb, rhsLsb)
-	{ }
-};
-
-// reg8, comp reg16
-
 // reg16
 struct Reg16Param
 {
-	ushort &reg;
-	Reg16Param(ushort &reg) :
+	CompositeRegister *reg;
+
+	Reg16Param(CompositeRegister *reg) :
 		reg(reg)
 	{ }
+
+	~Reg16Param()
+	{
+		delete reg;
+	}
 };
 
-// imm16
+// reg16, reg16
+struct Reg16Reg16Param
+{
+	CompositeRegister *lhs;
+	CompositeRegister *rhs;
+
+	Reg16Reg16Param(CompositeRegister *lhs, CompositeRegister *rhs) :
+		lhs(lhs),
+		rhs(rhs)
+	{ }
+
+	~Reg16Reg16Param()
+	{
+		delete lhs;
+		delete rhs;
+	}
+};
+
+// reg16, reg8
+struct Reg16Reg8Param
+{
+	CompositeRegister *reg16;
+	uchar &reg8;
+
+	Reg16Reg8Param(CompositeRegister *reg16, uchar &reg8) :
+		reg16(reg16),
+		reg8(reg8)
+	{ }
+
+	~Reg16Reg8Param()
+	{
+		delete reg16;
+	}
+};
 
 #endif

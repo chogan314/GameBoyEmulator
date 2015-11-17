@@ -7,15 +7,32 @@ typedef unsigned short ushort;
 class CompositeRegister
 {
 public:
-	CompositeRegister(uchar &msb, uchar &lsb);
-
 	ushort &GetMemory();
+
+	virtual void Finalize() = 0;
+protected:
+	ushort memory;
+};
+
+class CReg16Bit : public CompositeRegister
+{
+public:
+	CReg16Bit(ushort &reg);
 
 	void Finalize();
 private:
-	uchar &msb;		// most significant byte
-	uchar &lsb;		// least significant byte
-	ushort memory;
+	ushort &reg;
+};
+
+class CReg8Bit8Bit : public CompositeRegister
+{
+public:
+	CReg8Bit8Bit(uchar &msb, uchar &lsb);
+	
+	void Finalize();
+private:
+	uchar &msb;
+	uchar &lsb;
 };
 
 #endif
