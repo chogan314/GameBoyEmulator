@@ -16,6 +16,57 @@ class CPU
 {
 	friend class Instruction;
 	friend class InstructionFactory;
+
+	// INC reg8
+	friend void IncReg8(ParamInstruction<Reg8Param> &instruction);
+
+	// DEC reg8
+	friend void DecReg8(ParamInstruction<Reg8Param> &instruction);
+
+	// LD reg8, imm8
+	friend void LdReg8Imm8(ParamInstruction<Reg8Param> &instruction);
+
+	// LD reg8, reg8
+	friend void LdReg8Reg8(ParamInstruction<Reg8Reg8Param> &instruction);
+
+	// LD reg8, (reg16)
+	friend void LdReg8AddrReg16(ParamInstruction<Reg16Reg8Param> &instruction);
+
+	// LD reg8, (reg16+)
+	friend void LdReg8AddrIncReg16(ParamInstruction<Reg16Reg8Param> &instruction);
+
+	// INC reg16
+	friend void IncReg16(ParamInstruction<Reg16Param> &instruction);
+
+	// DEC reg16
+	friend void DecReg16(ParamInstruction<Reg16Param> &instruction);
+
+	// LD reg16, imm16
+	friend void LdReg16Imm16(ParamInstruction<Reg16Param> &instruction);
+
+	// ADD reg16, reg16
+	friend void AddReg16Reg16(ParamInstruction<Reg16Reg16Param> &instruction);
+
+	// INC (reg16)
+	friend void IncAddrReg16(ParamInstruction<Reg16Param> &instruction);
+
+	// DEC (reg16)
+	friend void DecAddrReg16(ParamInstruction<Reg16Param> &instruction);
+
+	// LD (reg16), imm8
+	friend void LdAddrReg16Imm8(ParamInstruction<Reg16Param> &instruction);
+
+	// LD (reg16), reg8
+	friend void LdAddrReg16Reg8(ParamInstruction<Reg16Reg8Param> &instruction);
+
+	// LD (reg16+), reg8
+	friend void LdAddrIncReg16Reg8(ParamInstruction<Reg16Reg8Param> &instruction);
+
+	// LD (reg16-), reg8
+	friend void LdAddrDecReg16Reg8(ParamInstruction<Reg16Reg8Param> &instruction);
+
+	// LD (imm16), reg16
+	friend void LdAddrImm16Reg16(ParamInstruction<Reg16Param> &instruction);
 public:
 	CPU();
 
@@ -45,6 +96,18 @@ private:
 	Instruction *instructions[512];
 
 	MemBlock *memory;
+
+	void SetZeroFlag(bool set);
+
+	void SetSubtractFlag(bool set);
+
+	void SetHalfCarryFlag(bool set);
+
+	void SetCarryFlag(bool set);
+
+	uchar ReadImm8Arg();
+
+	ushort ReadImm16Arg();
 };
 
 #endif

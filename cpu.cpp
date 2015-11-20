@@ -33,3 +33,33 @@ void CPU::InvokeInstruction(int index)
 
 	instructions[index]->Call();
 }
+
+void CPU::SetZeroFlag(bool set)
+{
+
+}
+
+void CPU::SetSubtractFlag(bool set)
+{
+
+}
+
+void CPU::SetHalfCarryFlag(bool set)
+{
+
+}
+
+void CPU::SetCarryFlag(bool set)
+{
+
+}
+
+uchar CPU::ReadImm8Arg()
+{
+	return memory->ReadByte(PC + 1);
+}
+
+ushort CPU::ReadImm16Arg()
+{
+	return memory->ReadShort(PC + 1);
+}

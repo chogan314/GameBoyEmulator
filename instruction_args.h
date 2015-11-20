@@ -78,4 +78,14 @@ struct Reg16Reg8Param
 	}
 };
 
+// imm8
+struct Imm8Param
+{
+	uchar imm8;
+
+	Imm8Param(uchar imm8) :
+		imm8(imm8)
+	{ }
+};
+
 #endif
