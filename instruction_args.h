@@ -88,4 +88,45 @@ struct Imm8Param
 	{ }
 };
 
+// imm8, reg8
+struct Imm8Reg8Param
+{
+	uchar imm8;
+	uchar &reg8;
+
+	Imm8Reg8Param(uchar imm8, uchar &reg8) :
+		imm8(imm8),
+		reg8(reg8)
+	{ }
+};
+
+// imm8, reg16
+struct Imm8Reg16Param
+{
+	uchar imm8;
+	CompositeRegister *reg16;
+
+	Imm8Reg16Param(uchar imm8, CompositeRegister *reg16) :
+		imm8(imm8),
+		reg16(reg16)
+	{ }
+
+	~Imm8Reg16Param()
+	{
+		delete reg16;
+	}
+};
+
+// flagOffset, expectedValue
+struct ConditionalParam
+{
+	uchar flagOffset;
+	bool expectedValue;
+
+	ConditionalParam(uchar flagOffset, bool expectedValue) :
+		flagOffset(flagOffset),
+		expectedValue(expectedValue)
+	{ }
+};
+
 #endif

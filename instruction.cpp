@@ -2,7 +2,7 @@
 #include "cpu.h"
 
 /*******************************
-**********Instruction***********
+********* Instruction **********
 ********************************/
 Instruction::Instruction(CPU *processor, std::string mnemonic,
 		int size, int duration, bool isJump) :
@@ -21,7 +21,7 @@ void Instruction::Call()
 }
 
 /*******************************
-*******NoParamInstruction*******
+****** NoParamInstruction ******
 ********************************/
 NoParamInstruction::NoParamInstruction(CPU *processor, std::string mnemonic,
 		int size, int duration, bool isJump, NoParamOnCall onCall) :
