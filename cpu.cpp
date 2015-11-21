@@ -39,9 +39,19 @@ void CPU::SetZeroFlag(bool set)
 
 }
 
+bool CPU::GetZeroFlag()
+{
+	return false;
+}
+
 void CPU::SetSubtractFlag(bool set)
 {
 
+}
+
+bool CPU::GetSubtractFlag()
+{
+	return false;
 }
 
 void CPU::SetHalfCarryFlag(bool set)
@@ -49,9 +59,19 @@ void CPU::SetHalfCarryFlag(bool set)
 
 }
 
+bool CPU::GetHalfCarryFlag()
+{
+	return false;
+}
+
 void CPU::SetCarryFlag(bool set)
 {
 
+}
+
+bool CPU::GetCarryFlag()
+{
+	return false;
 }
 
 uchar CPU::ReadImm8Arg()
