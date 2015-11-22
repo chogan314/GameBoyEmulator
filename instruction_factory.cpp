@@ -133,7 +133,15 @@ void LdReg16Imm16(ParamInstruction<Reg16Param> &instruction)
 // LD reg16, reg16 + S-imm8
 void LdReg16Reg16AddImm8S(ParamInstruction<Reg16Reg16Param> &instruction)
 {
-	// TODO: look at flags
+	ushort rhsReg = instruction.params.rhs->GetMemory();
+	char imm8S = instruction.processor->ReadImm8Arg();
+
+	instruction.processor->SetZeroFlag(0);
+	instruction.processor->SetSubtractFlag(0);
+
+
+	// TODO: Handle signed 8-bit value
+
 }
 
 // LD (imm16), reg16
@@ -311,7 +319,7 @@ void AddReg16Reg16(ParamInstruction<Reg16Reg16Param> &instruction)
 // ADD reg16, S-imm8
 void AddReg16Imm8S(ParamInstruction<Reg16Param> &instruction)
 {
-
+	// TODO: signed values
 }
 
 
@@ -683,168 +691,379 @@ void CCF(NoParamInstruction &instruction)
 // RLCA
 void RLCA(NoParamInstruction &instruction)
 {
+	uchar &A = instruction.processor->A;
+	uchar leftmostBit = (A & (1 << 7)) >> 7;
+	A = A << 1;
+	A |= leftmostBit;
 
+	instruction.processor->SetZeroFlag(A == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(leftmostBit != 0);
 }
 
 // RRCA
 void RRCA(NoParamInstruction &instruction)
 {
+	uchar &A = instruction.processor->A;
+	uchar rightmostBit = (A & 1);
+	A = A >> 1;
+	A |= (rightmostBit << 7);
 
-}
-
-// RRA
-void RRA(NoParamInstruction &instruction)
-{
-
+	instruction.processor->SetZeroFlag(A == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(rightmostBit != 0);
 }
 
 // RLA
 void RLA(NoParamInstruction &instruction)
 {
+	uchar &A = instruction.processor->A;
+	uchar leftmostBit = (A & (1 << 7)) >> 7;
+	A = A << 1;
+	A |= (uchar) instruction.processor->GetCarryFlag();
 
+	instruction.processor->SetZeroFlag(A == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(leftmostBit != 0);
+}
+
+// RRA
+void RRA(NoParamInstruction &instruction)
+{
+	uchar &A = instruction.processor->A;
+	uchar rightmostBit = (A & 1);
+	A = A >> 1;
+	A |= ((uchar) instruction.processor->GetCarryFlag() << 7);
+
+	instruction.processor->SetZeroFlag(A == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(rightmostBit != 0);
 }
 
 
 // RLC reg8
 void RlcReg8(ParamInstruction<Reg8Param> &instruction)
 {
+	uchar &reg = instruction.params.reg;
+	uchar leftmostBit = (reg & (1 << 7)) >> 7;
+	reg = reg << 1;
+	reg |= leftmostBit;
 
+	instruction.processor->SetZeroFlag(reg == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(leftmostBit != 0);
 }
 
 // RLC (reg16)
 void RlcAddrReg16(ParamInstruction<Reg16Param> &instruction)
 {
+	MemBlock *memory = instruction.processor->memory;
+	uchar memVal = memory->ReadByte(instruction.params.reg->GetMemory());
+	uchar leftmostBit = (memVal & (1 << 7)) >> 7;
+	memVal = memVal << 1;
+	memVal |= leftmostBit;
 
+	instruction.processor->SetZeroFlag(memVal == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(leftmostBit != 0);
+
+	memory->WriteByte(instruction.params.reg->GetMemory(), memVal);
 }
 
 
 // RRC reg8
 void RrcReg8(ParamInstruction<Reg8Param> &instruction)
 {
+	uchar &reg = instruction.params.reg;
+	uchar rightmostBit = (reg & 1);
+	reg = reg >> 1;
+	reg |= (rightmostBit << 7);
 
+	instruction.processor->SetZeroFlag(reg == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(rightmostBit != 0);
 }
 
 // RRC (reg16)
 void RrcAddrReg16(ParamInstruction<Reg16Param> &instruction)
 {
+	MemBlock *memory = instruction.processor->memory;
+	uchar memVal = memory->ReadByte(instruction.params.reg->GetMemory());
+	uchar rightmostBit = (memVal & 1);
+	memVal = memVal >> 1;
+	memVal |= (rightmostBit << 7);
 
+	instruction.processor->SetZeroFlag(memVal == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(rightmostBit != 0);
+
+	memory->WriteByte(instruction.params.reg->GetMemory(), memVal);
 }
 
 
 // RL reg8
 void RlReg8(ParamInstruction<Reg8Param> &instruction)
 {
+	uchar &reg = instruction.params.reg;
+	uchar leftmostBit = (reg & (1 << 7)) >> 7;
+	reg = reg << 1;
+	reg |= (uchar) instruction.processor->GetCarryFlag();
 
+	instruction.processor->SetZeroFlag(reg == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(leftmostBit != 0);
 }
 
 // RL (reg16)
 void RlAddrReg16(ParamInstruction<Reg16Param> &instruction)
 {
+	MemBlock *memory = instruction.processor->memory;
+	uchar memVal = memory->ReadByte(instruction.params.reg->GetMemory());
+	uchar leftmostBit = (memVal & (1 << 7)) >> 7;
+	memVal = memVal << 1;
+	memVal |= (uchar) instruction.processor->GetCarryFlag();
 
+	instruction.processor->SetZeroFlag(memVal == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(leftmostBit != 0);
+
+	memory->WriteByte(instruction.params.reg->GetMemory(), memVal);
 }
 
 
 // RR reg8
 void RrReg8(ParamInstruction<Reg8Param> &instruction)
 {
+	uchar &reg = instruction.params.reg;
+	uchar rightmostBit = (reg & 1);
+	reg = reg >> 1;
+	reg |= ((uchar) instruction.processor->GetCarryFlag() << 7);
 
+	instruction.processor->SetZeroFlag(reg == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(rightmostBit != 0);
 }
 
 // RR (reg16)
 void RrAddrReg16(ParamInstruction<Reg16Param> &instruction)
 {
+	MemBlock *memory = instruction.processor->memory;
+	uchar memVal = memory->ReadByte(instruction.params.reg->GetMemory());
+	uchar rightmostBit = (memVal & 1);
+	memVal = memVal >> 1;
+	memVal |= ((uchar) instruction.processor->GetCarryFlag() << 7);
 
+	instruction.processor->SetZeroFlag(memVal == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(rightmostBit != 0);
+
+	memory->WriteByte(instruction.params.reg->GetMemory(), memVal);
 }
 
 
 // SLA reg8
 void SlaReg8(ParamInstruction<Reg8Param> &instruction)
 {
+	uchar &reg = instruction.params.reg;
+	uchar leftmostBit = (reg & (1 << 7)) >> 7;
+	reg = reg << 1;
 
+	instruction.processor->SetZeroFlag(reg == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(leftmostBit != 0);
 }
 
 // SLA (reg16)
 void SlaAddrReg16(ParamInstruction<Reg16Param> &instruction)
 {
+	MemBlock *memory = instruction.processor->memory;
+	uchar memVal = memory->ReadByte(instruction.params.reg->GetMemory());
+	uchar leftmostBit = (memVal & (1 << 7)) >> 7;
+	memVal = memVal << 1;
 
+	instruction.processor->SetZeroFlag(memVal == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(leftmostBit != 0);
+
+	memory->WriteByte(instruction.params.reg->GetMemory(), memVal);
 }
 
 
 // SRA reg8
 void SraReg8(ParamInstruction<Reg8Param> &instruction)
 {
+	uchar &reg = instruction.params.reg;
+	uchar rightmostBit = (reg & 1);
+	uchar leftmostBit = (reg & (1 << 7)) >> 7;
+	reg = reg >> 1;
+	reg |= leftmostBit << 7;
 
+	instruction.processor->SetZeroFlag(reg == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(rightmostBit != 0);
 }
 
 // SRA (reg16)
 void SraAddrReg16(ParamInstruction<Reg16Param> &instruction)
 {
+	MemBlock *memory = instruction.processor->memory;
+	uchar memVal = memory->ReadByte(instruction.params.reg->GetMemory());
+	uchar rightmostBit = (memVal & 1);
+	uchar leftmostBit = (memVal & (1 << 7)) >> 7;
+	memVal = memVal >> 1;
+	memVal |= leftmostBit << 7;
 
-}
+	instruction.processor->SetZeroFlag(memVal == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(rightmostBit != 0);
 
-
-// SWAP reg8
-void SwapReg8(ParamInstruction<Reg8Param> &instruction)
-{
-
-}
-
-// SWAP (reg16)
-void SwapAddrReg16(ParamInstruction<Reg16Param> &instruction)
-{
-
+	memory->WriteByte(instruction.params.reg->GetMemory(), memVal);
 }
 
 
 // SRL reg8
 void SrlReg8(ParamInstruction<Reg8Param> &instruction)
 {
+	uchar &reg = instruction.params.reg;
+	uchar rightmostBit = (reg & 1);
+	reg = reg >> 1;
 
+	instruction.processor->SetZeroFlag(reg == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(rightmostBit != 0);
 }
 
 // SRL (reg16)
 void SrlAddrReg16(ParamInstruction<Reg16Param> &instruction)
 {
+	MemBlock *memory = instruction.processor->memory;
+	uchar memVal = memory->ReadByte(instruction.params.reg->GetMemory());
+	uchar rightmostBit = (memVal & 1);
+	memVal = memVal >> 1;
 
+	instruction.processor->SetZeroFlag(memVal == 0x00U);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(rightmostBit != 0);
+
+	memory->WriteByte(instruction.params.reg->GetMemory(), memVal);
+}
+
+
+// SWAP reg8
+void SwapReg8(ParamInstruction<Reg8Param> &instruction)
+{
+	uchar &reg = instruction.params.reg;
+
+	uchar left = (reg & 0xf0U) >> 4;
+	uchar right = reg & 0x0fU;
+
+	reg = left;
+	reg |= right << 4;
+}
+
+// SWAP (reg16)
+void SwapAddrReg16(ParamInstruction<Reg16Param> &instruction)
+{
+	MemBlock *memory = instruction.processor->memory;
+	uchar memVal = memory->ReadByte(instruction.params.reg->GetMemory());
+
+	uchar left = (memVal & 0xf0U) >> 4;
+	uchar right = memVal & 0x0fU;
+
+	memVal = left;
+	memVal |= right << 4;
+
+	memory->WriteByte(instruction.params.reg->GetMemory(), memVal);
 }
 
 
 // BIT imm8, reg8
 void BitImm8Reg8(ParamInstruction<Imm8Reg8Param> &instruction)
 {
+	uchar &reg = instruction.params.reg8;
+	uchar index = instruction.params.imm8;
+	uchar mask = 1 << index;
 
+	instruction.processor->SetZeroFlag((reg & mask) == 0);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(1);
 }
 
 // BIT imm8, (reg16)
 void BitImm8AddrReg16(ParamInstruction<Imm8Reg16Param> &instruction)
 {
+	MemBlock *memory = instruction.processor->memory;
+	uchar memVal = memory->ReadByte(instruction.params.reg16->GetMemory());
+	uchar index = instruction.params.imm8;
+	uchar mask = 1 << index;
 
+	instruction.processor->SetZeroFlag((memVal & mask) == 0);
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(1);
 }
 
 
 // RES imm8, reg8
 void ResImm8Reg8(ParamInstruction<Imm8Reg8Param> &instruction)
 {
+	uchar &reg = instruction.params.reg8;
+	uchar index = instruction.params.imm8;
+	uchar mask = 1 << index;
 
+	reg ^= mask;
 }
 
 // RES imm8, (reg16)
 void ResImm8AddrReg16(ParamInstruction<Imm8Reg16Param> &instruction)
 {
+	MemBlock *memory = instruction.processor->memory;
+	uchar memVal = memory->ReadByte(instruction.params.reg16->GetMemory());
+	uchar index = instruction.params.imm8;
+	uchar mask = 1 << index;
 
+	memVal ^= mask;
+	memory->WriteByte(instruction.params.reg16->GetMemory(), memVal);
 }
 
 
 // SET imm8, reg8
 void SetImm8Reg8(ParamInstruction<Imm8Reg8Param> &instruction)
 {
-
+	uchar &reg = instruction.params.reg8;
+	uchar index = instruction.params.imm8;
+	uchar mask = 1 << index;
+	
+	reg |= mask;
 }
 
 // SET imm8, (reg16)
 void SetImm8AddrReg16(ParamInstruction<Imm8Reg16Param> &instruction)
 {
+	MemBlock *memory = instruction.processor->memory;
+	uchar memVal = memory->ReadByte(instruction.params.reg16->GetMemory());
+	uchar index = instruction.params.imm8;
+	uchar mask = 1 << index;
 
+	memVal |= mask;
+	memory->WriteByte(instruction.params.reg16->GetMemory(), memVal);
 }
 
 /*******************************
@@ -853,72 +1072,112 @@ void SetImm8AddrReg16(ParamInstruction<Imm8Reg16Param> &instruction)
 // JR S-imm8
 void JrImm8S(NoParamInstruction &instruction)
 {
-
+	// TODO: signed values
 }
 
 // JR CONDITION, S-imm8
 void JrCondImm8S(ParamInstruction<ConditionalParam> &instruction)
 {
-
+	// TODO: signed values
 }
 
 
 // JP imm16
 void JpImm16(NoParamInstruction &instruction)
 {
-
+	instruction.processor->PC = instruction.processor->ReadImm16Arg();
 }
 
 // JP CONDITION, imm16
 void JpCondImm16(ParamInstruction<ConditionalParam> &instruction)
 {
+	uchar mask = 1 << instruction.params.flagOffset;
+	bool set = (instruction.processor->F & mask) != 0;
 
+	if (set == instruction.params.expectedValue)
+	{
+		instruction.processor->PC = instruction.processor->ReadImm16Arg();
+	}
 }
 
 // JP (reg16)
 void JpAddrReg16(ParamInstruction<Reg16Param> &instruction)
 {
-
+	MemBlock *memory = instruction.processor->memory;
+	instruction.processor->PC = memory->ReadByte(instruction.params.reg->GetMemory());
 }
 
 
 // CALL imm16
 void CallImm16(NoParamInstruction &instruction)
 {
+	MemBlock *memory = instruction.processor->memory;
+	memory->WriteShort(instruction.processor->SP, instruction.processor->PC + 3);
 
+	instruction.processor->SP -= 2;
+
+	instruction.processor->PC = instruction.processor->ReadImm16Arg();
 }
 
 // CALL CONDITION, imm16
 void CallCondImm16(ParamInstruction<ConditionalParam> &instruction)
 {
+	uchar mask = 1 << instruction.params.flagOffset;
+	bool set = (instruction.processor->F & mask) != 0;
 
+	if (set == instruction.params.expectedValue)
+	{
+		MemBlock *memory = instruction.processor->memory;
+		memory->WriteShort(instruction.processor->SP, instruction.processor->PC + 3);
+
+		instruction.processor->SP -= 2;
+
+		instruction.processor->PC = instruction.processor->ReadImm16Arg();
+	}
 }
 
 
 // RET
 void RET(NoParamInstruction &instruction)
 {
+	MemBlock *memory = instruction.processor->memory;
+	instruction.processor->PC = memory->ReadShort(instruction.processor->SP);
 
+	instruction.processor->SP += 2;
 }
 
 // RET CONDITION
 void RetCond(ParamInstruction<ConditionalParam> &instruction)
 {
+	uchar mask = 1 << instruction.params.flagOffset;
+	bool set = (instruction.processor->F & mask) != 0;
 
+	if (set == instruction.params.expectedValue)
+	{
+		MemBlock *memory = instruction.processor->memory;
+		instruction.processor->PC = memory->ReadShort(instruction.processor->SP);
+
+		instruction.processor->SP += 2;
+	}
 }
 
 
 // RETI
 void RETI(NoParamInstruction &instruction)
 {
-
+	// TODO: Interrupts
 }
 
 
 // RST imm8
 void RstImm8(ParamInstruction<Imm8Param> &instruction)
 {
+	MemBlock *memory = instruction.processor->memory;
+	memory->WriteShort(instruction.processor->SP, instruction.processor->PC + 3);
 
+	instruction.processor->SP -= 2;
+
+	instruction.processor->PC = instruction.params.imm8;
 }
 
 /*******************************
@@ -959,6 +1218,18 @@ void EI(NoParamInstruction &instruction)
 {
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 InstructionFactory::InstructionFactory(CPU *processor) : 
 	processor(processor)
