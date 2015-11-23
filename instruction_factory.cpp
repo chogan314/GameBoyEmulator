@@ -23,7 +23,7 @@ void LdReg8AddrReg8(ParamInstruction<Reg8Reg8Param> &instruction)
 {
 	MemBlock *memory = instruction.processor->memory;
 	
-	instruction.params.lhs = memory->ReadByte(0xff00 + instruction.params.rhs);
+	instruction.params.lhs = memory->ReadByte(0xff00U + instruction.params.rhs);
 }
 
 // LD reg8, (imm16)
@@ -69,7 +69,7 @@ void LdAddrReg8Reg8(ParamInstruction<Reg8Reg8Param> &instruction)
 {
 	MemBlock *memory = instruction.processor->memory;
 
-	memory->WriteByte(0xff00 + instruction.params.lhs, instruction.params.rhs);		// may not need 0xff00 + ...
+	memory->WriteByte(0xff00U + instruction.params.lhs, instruction.params.rhs);		// may not need 0xff00 + ...
 }
 
 // LD (reg16), imm8
@@ -313,7 +313,7 @@ void AddReg8AddrReg16(ParamInstruction<Reg16Reg8Param> &instruction)
 // ADD reg16, reg16
 void AddReg16Reg16(ParamInstruction<Reg16Reg16Param> &instruction)
 {
-
+	// TODO
 }
 
 // ADD reg16, S-imm8
@@ -664,25 +664,33 @@ void CpAddrReg16(ParamInstruction<Reg16Param> &instruction)
 // DAA
 void DAA(NoParamInstruction &instruction)
 {
-
+	// TODO: Binary Coded Decimal?
 }
 
 // CPL
 void CPL(NoParamInstruction &instruction)
 {
+	uchar &acc = instruction.processor->A;
+	acc ^= 0xffU;
 
+	instruction.processor->SetSubtractFlag(1);
+	instruction.processor->SetHalfCarryFlag(1);
 }
 
 // SCF
 void SCF(NoParamInstruction &instruction)
 {
-
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(1);
 }
 
 // CCF
 void CCF(NoParamInstruction &instruction)
 {
-
+	instruction.processor->SetSubtractFlag(0);
+	instruction.processor->SetHalfCarryFlag(0);
+	instruction.processor->SetCarryFlag(!instruction.processor->GetCarryFlag());
 }
 
 /*******************************
@@ -1165,7 +1173,12 @@ void RetCond(ParamInstruction<ConditionalParam> &instruction)
 // RETI
 void RETI(NoParamInstruction &instruction)
 {
-	// TODO: Interrupts
+	instruction.processor->interruptMasterEnable = true;
+
+	MemBlock *memory = instruction.processor->memory;
+	instruction.processor->PC = memory->ReadShort(instruction.processor->SP);
+
+	instruction.processor->SP += 2;
 }
 
 
@@ -1186,47 +1199,38 @@ void RstImm8(ParamInstruction<Imm8Param> &instruction)
 // NOP
 void NOP(NoParamInstruction &instruction)
 {
-
+	// Do nothing
 }
 
 // STOP 0
 void Stop0(NoParamInstruction &instruction)
 {
-
+	// TODO
 }
 
 // HALT
 void HALT(NoParamInstruction &instruction)
 {
-
+	// TODO
 }
 
 // PREFIX CB
 void PrefixCB(NoParamInstruction &instruction)
 {
-
+	instruction.processor->instructionExtenderFlag = true;
 }
 
 // DI
 void DI(NoParamInstruction &instruction)
 {
-
+	// TODO: disable interrupts AFTER next instruction?
 }
 
 // EI
 void EI(NoParamInstruction &instruction)
 {
-
+	// TODO: enable interrupts AFTER next instruction?
 }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1235,4 +1239,560 @@ InstructionFactory::InstructionFactory(CPU *processor) :
 	processor(processor)
 {
 
+}
+
+/*******************************
+******** Loads & Moves *********
+********************************/
+// LD reg8, imm8
+Instruction *InstructionFactory::MakeLdReg8Imm8(uchar &reg8, const std::string &mnemonic)
+{
+	Reg8Param param(reg8);
+	return new ParamInstruction<Reg8Param>(processor, mnemonic, 2, 8, false, param, LdReg8Imm8);
+}
+
+// LD reg8, reg8
+Instruction *InstructionFactory::MakeLdReg8Reg8(uchar &lhs, uchar &rhs, const std::string &mnemonic)
+{
+	Reg8Reg8Param param(lhs, rhs);
+	return new ParamInstruction<Reg8Reg8Param>(processor, mnemonic, 1, 4, false, param, LdReg8Reg8);
+}
+
+// LD reg8, (reg8)
+Instruction *InstructionFactory::MakeLdReg8AddrReg8(uchar &lhs, uchar &rhs, const std::string &mnemonic)
+{
+	Reg8Reg8Param param(lhs, rhs);
+	return new ParamInstruction<Reg8Reg8Param>(processor, mnemonic, 2, 8, false, param, LdReg8AddrReg8);
+}
+
+// LD reg8, (imm16)
+Instruction *InstructionFactory::MakeLdReg8AddrImm16(uchar &reg8, const std::string &mnemonic)
+{
+	Reg8Param param(reg8);
+	return new ParamInstruction<Reg8Param>(processor, mnemonic, 3, 16, false, param, LdReg8AddrImm16);
+}
+
+// LD reg8, (reg16)
+Instruction *InstructionFactory::MakeLdReg8AddrReg16(CompositeRegister *reg16, uchar &reg8, const std::string &mnemonic)
+{
+	Reg16Reg8Param param(reg16, reg8);
+	return new ParamInstruction<Reg16Reg8Param>(processor, mnemonic, 1, 8, false, param, LdReg8AddrReg16);
+}
+
+// LD reg8, (reg16+)
+Instruction *InstructionFactory::MakeLdReg8AddrIncReg16(CompositeRegister *reg16, uchar &reg8, const std::string &mnemonic)
+{
+	Reg16Reg8Param param(reg16, reg8);
+	return new ParamInstruction<Reg16Reg8Param>(processor, mnemonic, 1, 8, false, param, LdReg8AddrIncReg16);
+}
+
+// LD reg8, (reg16-)
+Instruction *InstructionFactory::MakeLdReg8AddrDecReg16(CompositeRegister *reg16, uchar &reg8, const std::string &mnemonic)
+{
+	Reg16Reg8Param param(reg16, reg8);
+	return new ParamInstruction<Reg16Reg8Param>(processor, mnemonic, 1, 8, false, param, LdReg8AddrDecReg16);
+}
+
+// LD (reg8), reg8
+Instruction *InstructionFactory::MakeLdAddrReg8Reg8(uchar &lhs, uchar &rhs, const std::string &mnemonic)
+{
+	Reg8Reg8Param param(lhs, rhs);
+	return new ParamInstruction<Reg8Reg8Param>(processor, mnemonic, 2, 8, false, param, LdAddrReg8Reg8);
+}
+
+// LD (reg16), imm8
+Instruction *InstructionFactory::MakeLdAddrReg16Imm8(CompositeRegister *reg16, const std::string &mnemonic)
+{
+	Reg16Param param(reg16);
+	return new ParamInstruction<Reg16Param>(processor, mnemonic, 2, 12, false, param, LdAddrReg16Imm8);
+}
+
+// LD (reg16), reg8
+Instruction *InstructionFactory::MakeLdAddrReg16Reg8(CompositeRegister *reg16, uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// LD (reg16+), reg8
+Instruction *InstructionFactory::MakeLdAddrIncReg16Reg8(CompositeRegister *reg16, uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// LD (reg16-), reg8
+Instruction *InstructionFactory::MakeLdAddrDecReg16Reg8(CompositeRegister *reg16, uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// LD (imm16), reg8
+Instruction *InstructionFactory::MakeLdAddrImm16Reg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// LD reg16, imm16
+Instruction *InstructionFactory::MakeLdReg16Imm16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+// LD reg16, reg16 + S-imm8
+Instruction *InstructionFactory::MakeLdReg16Reg16AddImm8S(CompositeRegister *lhs, CompositeRegister *rhs, const std::string &mnemonic)
+{
+}
+
+// LD (imm16), reg16
+Instruction *InstructionFactory::MakeLdAddrImm16Reg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// LDH (imm8), reg8
+Instruction *InstructionFactory::MakeLdHAddrImm8Reg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// LDH reg8, (imm8)
+Instruction *InstructionFactory::MakeLdHReg8AddrImm8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+
+// POP reg16
+Instruction *InstructionFactory::MakePopReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+// PUSH reg16
+Instruction *InstructionFactory::MakePushReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+/*******************************
+********* Math & Logic *********
+********************************/
+// INC reg8
+Instruction *InstructionFactory::MakeIncReg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// INC (reg16) ; 8-bit
+Instruction *InstructionFactory::MakeIncAddrReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+// INC reg16
+Instruction *InstructionFactory::MakeIncReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// DEC reg8
+Instruction *InstructionFactory::MakeDecReg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// DEC (reg16) ; 8-bit
+Instruction *InstructionFactory::MakeDecAddrReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+// DEC reg16
+Instruction *InstructionFactory::MakeDecReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// ADD reg8, imm8
+Instruction *InstructionFactory::MakeAddReg8Imm8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// ADD reg8, reg8
+Instruction *InstructionFactory::MakeAddReg8Reg(uchar &lhs, uchar &rhs, const std::string &mnemonic)
+{
+}
+
+// ADD reg8, (reg16)
+Instruction *InstructionFactory::MakeAddReg8AddrReg16(CompositeRegister *reg16, uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// ADD reg16, reg16
+Instruction *InstructionFactory::MakeAddReg16Reg16(CompositeRegister *lhs, CompositeRegister *rhs, const std::string &mnemonic)
+{
+}
+
+// ADD reg16, S-imm8
+Instruction *InstructionFactory::MakeAddReg16Imm8S(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// ADC reg8, imm8
+Instruction *InstructionFactory::MakeAdcReg8Imm8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// ADC reg8, reg8
+Instruction *InstructionFactory::MakeAdcReg8Reg8(uchar &lhs, uchar &rhs, const std::string &mnemonic)
+{
+}
+
+// ADC reg8, (reg16)
+Instruction *InstructionFactory::MakeAdcReg8AddrReg16(CompositeRegister *reg16, uchar &reg8, const std::string &mnemonic)
+{
+}
+
+
+// SUB imm8
+Instruction *InstructionFactory::MakeSubImm8(const std::string &mnemonic)
+{
+}
+
+// SUB reg8
+Instruction *InstructionFactory::MakeSubReg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// SUB (reg16)
+Instruction *InstructionFactory::MakeSubAddrReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// SBC reg8, imm8
+Instruction *InstructionFactory::MakeSbcReg8Imm8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// SBC reg8, reg8
+Instruction *InstructionFactory::MakeSbcReg8Reg8(uchar &lhs, uchar &rhs, const std::string &mnemonic)
+{
+}
+
+// SBC reg8, (reg16)
+Instruction *InstructionFactory::MakeSbcReg8AddrReg16(CompositeRegister *reg16, uchar &reg8, const std::string &mnemonic)
+{
+}
+
+
+// AND imm8
+Instruction *InstructionFactory::MakeAndImm8(const std::string &mnemonic)
+{
+}
+
+// AND reg8
+Instruction *InstructionFactory::MakeAndReg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// AND (reg16)
+Instruction *InstructionFactory::MakeAndAddrReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// XOR imm8
+Instruction *InstructionFactory::MakeXorImm8(const std::string &mnemonic)
+{
+}
+
+// XOR reg8
+Instruction *InstructionFactory::MakeXorReg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// XOR (reg16)
+Instruction *InstructionFactory::MakeXorAddrReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// OR imm8
+Instruction *InstructionFactory::MakeOrImm8(const std::string &mnemonic)
+{
+}
+
+// OR reg8
+Instruction *InstructionFactory::MakeOrReg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// OR (reg16)
+Instruction *InstructionFactory::MakeOrAddrReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// CP imm8
+Instruction *InstructionFactory::MakeCpImm8(const std::string &mnemonic)
+{
+}
+
+// CP reg8
+Instruction *InstructionFactory::MakeCpReg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// CP (reg16)
+Instruction *InstructionFactory::MakeCpAddrReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// DAA
+Instruction *InstructionFactory::MakeDAA(const std::string &mnemonic)
+{
+}
+
+// CPL
+Instruction *InstructionFactory::MakeCPL(const std::string &mnemonic)
+{
+}
+
+// SCF
+Instruction *InstructionFactory::MakeSCF(const std::string &mnemonic)
+{
+}
+
+// CCF
+Instruction *InstructionFactory::MakeCCF(const std::string &mnemonic)
+{
+}
+
+/*******************************
+****** Shifts & Rotations ******
+********************************/
+// RLCA
+Instruction *InstructionFactory::MakeRLCA(const std::string &mnemonic)
+{
+}
+
+// RRCA
+Instruction *InstructionFactory::MakeRRCA(const std::string &mnemonic)
+{
+}
+
+// RRA
+Instruction *InstructionFactory::MakeRRA(const std::string &mnemonic)
+{
+}
+
+// RLA
+Instruction *InstructionFactory::MakeRLA(const std::string &mnemonic)
+{
+}
+
+
+// RLC reg8
+Instruction *InstructionFactory::MakeRlcReg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// RLC (reg16)
+Instruction *InstructionFactory::MakeRlcAddrReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// RRC reg8
+Instruction *InstructionFactory::MakeRrcReg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// RRC (reg16)
+Instruction *InstructionFactory::MakeRrcAddrReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// RL reg8
+Instruction *InstructionFactory::MakeRlReg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// RL (reg16)
+Instruction *InstructionFactory::MakeRlAddrReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// RR reg8
+Instruction *InstructionFactory::MakeRrReg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// RR (reg16)
+Instruction *InstructionFactory::MakeRrAddrReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// SLA reg8
+Instruction *InstructionFactory::MakeSlaReg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// SLA (reg16)
+Instruction *InstructionFactory::MakeSlaAddrReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// SRA reg8
+Instruction *InstructionFactory::MakeSraReg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// SRA (reg16)
+Instruction *InstructionFactory::MakeSraAddrReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// SWAP reg8
+Instruction *InstructionFactory::MakeSwapReg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// SWAP (reg16)
+Instruction *InstructionFactory::MakeSwapAddrReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// SRL reg8
+Instruction *InstructionFactory::MakeSrlReg8(uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// SRL (reg16)
+Instruction *InstructionFactory::MakeSrlAddrReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// BIT imm8, reg8
+Instruction *InstructionFactory::MakeBitImm8Reg8(uchar imm8, uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// BIT imm8, (reg16)
+Instruction *InstructionFactory::MakeBitImm8AddrReg16(uchar imm8, CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// RES imm8, reg8
+Instruction *InstructionFactory::MakeResImm8Reg8(uchar imm8, uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// RES imm8, (reg16)
+Instruction *InstructionFactory::MakeResImm8AddrReg16(uchar imm8, CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// SET imm8, reg8
+Instruction *InstructionFactory::MakeSetImm8Reg8(uchar imm8, uchar &reg8, const std::string &mnemonic)
+{
+}
+
+// SET imm8, (reg16)
+Instruction *InstructionFactory::MakeSetImm8AddrReg16(uchar imm8, CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+/*******************************
+******** Jumps & Calls *********
+********************************/
+// JR S-imm8
+Instruction *InstructionFactory::MakeJrImm8S(const std::string &mnemonic)
+{
+}
+
+// JR CONDITION, S-imm8
+Instruction *InstructionFactory::MakeJrCondImm8S(uchar flagOffset, bool expectedValue, const std::string &mnemonic)
+{
+}
+
+
+// JP imm16
+Instruction *InstructionFactory::MakeJpImm16(const std::string &mnemonic)
+{
+}
+
+// JP CONDITION, imm16
+Instruction *InstructionFactory::MakeJpCondImm16(uchar flagOffset, bool expectedValue, const std::string &mnemonic)
+{
+}
+
+// JP (reg16)
+Instruction *InstructionFactory::MakeJpAddrReg16(CompositeRegister *reg16, const std::string &mnemonic)
+{
+}
+
+
+// CALL imm16
+Instruction *InstructionFactory::MakeCallImm16(const std::string &mnemonic)
+{
+}
+
+// CALL CONDITION, imm16
+Instruction *InstructionFactory::MakeCallCondImm16(uchar flagOffset, bool expectedValue, const std::string &mnemonic)
+{
+}
+
+
+// RET
+Instruction *InstructionFactory::MakeRET(const std::string &mnemonic)
+{
+}
+
+// RET CONDITION
+Instruction *InstructionFactory::MakeRetCond(uchar flagOffset, bool expectedValue, const std::string &mnemonic)
+{
+}
+
+
+// RETI
+Instruction *InstructionFactory::MakeRETI(const std::string &mnemonic)
+{
+}
+
+
+// RST imm8
+Instruction *InstructionFactory::MakeRstImm8(uchar imm8, const std::string &mnemonic)
+{
+}
+
+/*******************************
+******** Misc & Control ********
+********************************/
+// NOP
+Instruction *InstructionFactory::MakeNOP(const std::string &mnemonic)
+{
+}
+
+// STOP 0
+Instruction *InstructionFactory::MakeStop0(const std::string &mnemonic)
+{
+}
+
+// HALT
+Instruction *InstructionFactory::MakeHALT(const std::string &mnemonic)
+{
+}
+
+// PREFIX CB
+Instruction *InstructionFactory::MakePrefixCB(const std::string &mnemonic)
+{
+}
+
+// DI
+Instruction *InstructionFactory::MakeDI(const std::string &mnemonic)
+{
+}
+
+// EI
+Instruction *InstructionFactory::MakeEI(const std::string &mnemonic)
+{
 }

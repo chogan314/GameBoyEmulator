@@ -143,7 +143,7 @@ public:
 
 	~CPU();
 
-	void InvokeInstruction(int index);
+	void Update();
 private:
 	uchar A;		// accumulator
 	uchar F;		// flags [Zero][Subtract][Half Carry][Carry][0][0][0][0]
@@ -162,12 +162,18 @@ private:
 	ushort SP;		// stack pointer
 	ushort PC;		// program counter
 
+	bool interruptMasterEnable;
+
 	bool instructionExtenderFlag;
 
 	Instruction *instructions[512];
 
 	MemBlock *memory;
 
+	void InvokeInstruction(int index);
+
+
+	// register F flag manipulation
 	void SetZeroFlag(bool set);
 	bool GetZeroFlag();
 
@@ -180,9 +186,38 @@ private:
 	void SetCarryFlag(bool set);
 	bool GetCarryFlag();
 
-	uchar ReadImm8Arg();
 
+	// memory register access
+	uchar ReadJoypadInfo();
+	void WriteJoypadInfo(uchar byte);
+
+	uchar ReadSerialTransferData();
+	void WriteSerialTransferData(uchar byte);
+
+	uchar ReadSI0Control();
+	void WriteSI0Control(uchar byte);
+
+	uchar ReadDivider();
+	void WriteDivider(uchar byte);
+
+	uchar ReadTimerCounter();
+	void WriteTimerCounter(uchar byte);
+
+	uchar ReadTimerModulo();
+	void WriteTimerModulo(uchar byte);
+
+	uchar ReadInterruptFlag();
+	void WriteInterruptFlag(uchar byte);
+
+	uchar ReadInterruptEnable();
+	void WriteInterruptEnable(uchar byte);
+
+
+	// misc
+	uchar ReadImm8Arg();
 	ushort ReadImm16Arg();
+
+	void DoInterruptJump(ushort address);
 };
 
 #endif

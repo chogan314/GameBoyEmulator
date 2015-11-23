@@ -40,7 +40,6 @@ inline HexUshortStruct hex(ushort s)
 int main()
 {
 	CPU processor;
-	processor.InvokeInstruction(1);
 
 	std::cout << ":SKDJLFSDKJL" << std::endl;
 }

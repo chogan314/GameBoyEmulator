@@ -78,6 +78,7 @@
   <ItemGroup>
     <ClInclude Include="composite_register.h" />
     <ClInclude Include="cpu.h" />
+    <ClInclude Include="memory_interface.h" />
     <ClInclude Include="instruction.h" />
     <ClInclude Include="instruction_args.h" />
     <ClInclude Include="instruction_factory.h" />
