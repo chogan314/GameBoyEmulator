@@ -134,7 +134,7 @@ class ParamInstruction : public Instruction
 	friend void DecAddrReg16(ParamInstruction<Reg16Param> &instruction);				// DEC (reg16) ; 8-bit
 	friend void DecReg16(ParamInstruction<Reg16Param> &instruction);					// DEC reg16
 	friend void AddReg8Imm8(ParamInstruction<Reg8Param> &instruction);					// ADD reg8, imm8
-	friend void AddReg8Reg(ParamInstruction<Reg8Reg8Param> &instruction);				// ADD reg8, reg8
+	friend void AddReg8Reg8(ParamInstruction<Reg8Reg8Param> &instruction);				// ADD reg8, reg8
 	friend void AddReg8AddrReg16(ParamInstruction<Reg16Reg8Param> &instruction);		// ADD reg8, (reg16)
 	friend void AddReg16Reg16(ParamInstruction<Reg16Reg16Param> &instruction);			// ADD reg16, reg16
 	friend void AddReg16Imm8S(ParamInstruction<Reg16Param> &instruction);				// ADD reg16, S-imm8

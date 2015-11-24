@@ -101,7 +101,7 @@ public:
 	Instruction *MakeAddReg8Imm8(uchar &reg8, const std::string &mnemonic);
 
 	// ADD reg8, reg8
-	Instruction *MakeAddReg8Reg(uchar &lhs, uchar &rhs, const std::string &mnemonic);
+	Instruction *MakeAddReg8Reg8(uchar &lhs, uchar &rhs, const std::string &mnemonic);
 
 	// ADD reg8, (reg16)
 	Instruction *MakeAddReg8AddrReg16(CompositeRegister *reg16, uchar &reg8, const std::string &mnemonic);
@@ -388,7 +388,7 @@ void DecReg8(ParamInstruction<Reg8Param> &instruction);						// DEC reg8
 void DecAddrReg16(ParamInstruction<Reg16Param> &instruction);				// DEC (reg16) ; 8-bit
 void DecReg16(ParamInstruction<Reg16Param> &instruction);					// DEC reg16
 void AddReg8Imm8(ParamInstruction<Reg8Param> &instruction);					// ADD reg8, imm8
-void AddReg8Reg(ParamInstruction<Reg8Reg8Param> &instruction);				// ADD reg8, reg8
+void AddReg8Reg8(ParamInstruction<Reg8Reg8Param> &instruction);				// ADD reg8, reg8
 void AddReg8AddrReg16(ParamInstruction<Reg16Reg8Param> &instruction);		// ADD reg8, (reg16)
 void AddReg16Reg16(ParamInstruction<Reg16Reg16Param> &instruction);			// ADD reg16, reg16
 void AddReg16Imm8S(ParamInstruction<Reg16Param> &instruction);				// ADD reg16, S-imm8
