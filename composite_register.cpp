@@ -5,6 +5,15 @@ ushort &CompositeRegister::GetMemory()
 	return memory;
 }
 
+CReg16Bit::CReg16Bit(ushort &reg) :
+	reg(reg)
+{ }
+
+CReg8Bit8Bit::CReg8Bit8Bit(uchar &msb, uchar &lsb) :
+	msb(msb),
+	lsb(lsb)
+{ }
+
 void CReg16Bit::Finalize()
 {
 	reg = memory;

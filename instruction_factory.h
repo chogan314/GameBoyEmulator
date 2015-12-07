@@ -54,6 +54,9 @@ public:
 	// LD reg16, imm16
 	Instruction *MakeLdReg16Imm16(CompositeRegister *reg16, const std::string &mnemonic);
 
+	// LD reg16, reg16
+	Instruction *MakeLdReg16Reg16(CompositeRegister *lhs, CompositeRegister *rhs, const std::string &mnemonic);
+
 	// LD reg16, reg16 + S-imm8
 	Instruction *MakeLdReg16Reg16AddImm8S(CompositeRegister *lhs, CompositeRegister *rhs, const std::string &mnemonic);
 
@@ -348,6 +351,10 @@ public:
 
 	// EI
 	Instruction *MakeEI(const std::string &mnemonic);
+
+	// Placeholder for no instruction
+	Instruction *MakeNoInstruction(const std::string &mnemonic);
+
 private:
 	CPU *processor;
 };
@@ -371,6 +378,7 @@ void LdAddrIncReg16Reg8(ParamInstruction<Reg16Reg8Param> &instruction);		// LD (
 void LdAddrDecReg16Reg8(ParamInstruction<Reg16Reg8Param> &instruction);		// LD (reg16-), reg8
 void LdAddrImm16Reg8(ParamInstruction<Reg8Param> &instruction);				// LD (imm16), reg8
 void LdReg16Imm16(ParamInstruction<Reg16Param> &instruction);				// LD reg16, imm16
+void LdReg16Reg16(ParamInstruction<Reg16Reg16Param> &instruction);			// LD reg16, reg16
 void LdReg16Reg16AddImm8S(ParamInstruction<Reg16Reg16Param> &instruction);	// LD reg16, reg16 + S-imm8
 void LdAddrImm16Reg16(ParamInstruction<Reg16Param> &instruction);			// LD (imm16), reg16
 void LdHAddrImm8Reg8(ParamInstruction<Reg8Param> &instruction);				// LDH (imm8), reg8

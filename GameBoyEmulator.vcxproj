@@ -41,6 +41,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\Users\Cory\Libraries\OpenGL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Cory\Libraries\OpenGL\libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -56,6 +58,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>glew32.lib;glew32s.lib;glfw3.lib;SOIL.lib;opengl32.lib;irrKlang.lib;freetype240MT_D.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -76,20 +79,41 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="cartridge.h" />
     <ClInclude Include="composite_register.h" />
     <ClInclude Include="cpu.h" />
+    <ClInclude Include="display.h" />
+    <ClInclude Include="game.h" />
+    <ClInclude Include="hex_printing.h" />
+    <ClInclude Include="input.h" />
+    <ClInclude Include="input_handler.h" />
     <ClInclude Include="instruction.h" />
     <ClInclude Include="instruction_args.h" />
     <ClInclude Include="instruction_factory.h" />
     <ClInclude Include="mem_block.h" />
+    <ClInclude Include="screen.h" />
+    <ClInclude Include="shader.h" />
+    <ClInclude Include="sprite_renderer.h" />
+    <ClInclude Include="test_screen.h" />
+    <ClInclude Include="texture.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cartridge.cpp" />
     <ClCompile Include="composite_register.cpp" />
     <ClCompile Include="cpu.cpp" />
+    <ClCompile Include="display.cpp" />
+    <ClCompile Include="game.cpp" />
+    <ClCompile Include="input.cpp" />
     <ClCompile Include="instruction.cpp" />
     <ClCompile Include="instruction_factory.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mem_block.cpp" />
+    <ClCompile Include="screen.cpp" />
+    <ClCompile Include="shader.cpp" />
+    <ClCompile Include="sprite_renderer.cpp" />
+    <ClCompile Include="test_screen.cpp" />
+    <ClCompile Include="texture.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

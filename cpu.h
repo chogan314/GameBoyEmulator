@@ -3,6 +3,7 @@
 
 #include "mem_block.h"
 #include "instruction_args.h"
+#include "cartridge.h"
 
 typedef unsigned short ushort;
 typedef unsigned char uchar;
@@ -14,6 +15,14 @@ class NoParamInstruction;
 
 class CPU
 {
+	enum class Color
+	{
+		WHITE,
+		LIGHT_GRAY,
+		DARK_GRAY,
+		BLACK
+	};
+
 	friend class Instruction;
 	friend class InstructionFactory;
 
@@ -139,12 +148,37 @@ class CPU
 	friend void EI(NoParamInstruction &instruction);									// EI
 
 public:
-	CPU();
+	uchar screenData[160 * 144 * 3];
+
+	CPU(MemBlock *memory);
 
 	~CPU();
 
 	void Update();
+
+	void InsertCartridge(Cartridge *cartridge);
+
+	// register F flag manipulation
+	void SetZeroFlag(bool set);
+	bool GetZeroFlag();
+
+	void SetSubtractFlag(bool set);
+	bool GetSubtractFlag();
+
+	void SetHalfCarryFlag(bool set);
+	bool GetHalfCarryFlag();
+
+	void SetCarryFlag(bool set);
+	bool GetCarryFlag();
+
+
+	void PrintInstructions();
+
 private:
+	const ushort TIMA = 0xFF05;
+	const ushort TMA = 0xFF06;
+	const ushort TMC = 0xFF07;
+
 	uchar A;		// accumulator
 	uchar F;		// flags [Zero][Subtract][Half Carry][Carry][0][0][0][0]
 					// combine for 16 bit register AF, only valid operations are push and pop
@@ -164,53 +198,34 @@ private:
 
 	bool interruptMasterEnable;
 
-	bool instructionExtenderFlag;
-
 	Instruction *instructions[512];
 
 	MemBlock *memory;
 
-	void InvokeInstruction(int index);
+	Cartridge *cartridge;
 
+	int timerCounter;
+	int dividerRegister;
 
-	// register F flag manipulation
-	void SetZeroFlag(bool set);
-	bool GetZeroFlag();
+	int scanlineCounter;
 
-	void SetSubtractFlag(bool set);
-	bool GetSubtractFlag();
+	bool disableIMEAfterNextInstruction;
+	bool enableIMEAfterNextInstruction;
 
-	void SetHalfCarryFlag(bool set);
-	bool GetHalfCarryFlag();
+	Instruction *InvokeInstruction(int index);
 
-	void SetCarryFlag(bool set);
-	bool GetCarryFlag();
+	// memory operations
+	uchar ReadByte(ushort address);
+	ushort ReadShort(ushort address);
 
+	void WriteByte(ushort address, uchar data);
+	void WriteShort(ushort address, ushort data);
 
-	// memory register access
-	uchar ReadJoypadInfo();
-	void WriteJoypadInfo(uchar byte);
+	void PushByte(uchar data);
+	void PushShort(ushort data);
 
-	uchar ReadSerialTransferData();
-	void WriteSerialTransferData(uchar byte);
-
-	uchar ReadSI0Control();
-	void WriteSI0Control(uchar byte);
-
-	uchar ReadDivider();
-	void WriteDivider(uchar byte);
-
-	uchar ReadTimerCounter();
-	void WriteTimerCounter(uchar byte);
-
-	uchar ReadTimerModulo();
-	void WriteTimerModulo(uchar byte);
-
-	uchar ReadInterruptFlag();
-	void WriteInterruptFlag(uchar byte);
-
-	uchar ReadInterruptEnable();
-	void WriteInterruptEnable(uchar byte);
+	uchar PopByte();
+	ushort PopShort();
 
 
 	// misc
@@ -219,7 +234,27 @@ private:
 	uchar ReadImm8Arg();
 	ushort ReadImm16Arg();
 
-	void DoInterruptJump(ushort address);
+	void UpdateTimers(int cycles);
+	void UpdateDividerRegister(int cycles);
+	bool ClockIsEnabled();
+	uchar GetClockFrequency();
+	void SetClockFrequency();
+
+	void RequestInterrupt(int flag);
+	void HandleInterrupts();
+	void ServiceInterrupt(int flag);
+
+	void UpdateGraphics(int cycles);
+	void SetLCDStatus();
+	bool LCDIsEnabled();
+	void DrawScanline();
+
+	void DMATransfer(uchar data);
+
+	void RenderTiles();
+	void RenderSprites();
+	Color GetColor(int colorNum, ushort address);
+
 };
 
 #endif

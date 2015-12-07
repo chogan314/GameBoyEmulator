@@ -37,10 +37,10 @@ struct Reg16Param
 		reg(reg)
 	{ }
 
-	~Reg16Param()
+	/*~Reg16Param()
 	{
 		delete reg;
-	}
+	}*/
 };
 
 // reg16, reg16
@@ -54,11 +54,11 @@ struct Reg16Reg16Param
 		rhs(rhs)
 	{ }
 
-	~Reg16Reg16Param()
+	/*~Reg16Reg16Param()
 	{
 		delete lhs;
 		delete rhs;
-	}
+	}*/
 };
 
 // reg16, reg8
@@ -72,10 +72,10 @@ struct Reg16Reg8Param
 		reg8(reg8)
 	{ }
 
-	~Reg16Reg8Param()
+	/*~Reg16Reg8Param()
 	{
 		delete reg16;
-	}
+	}*/
 };
 
 // imm8
@@ -111,10 +111,10 @@ struct Imm8Reg16Param
 		reg16(reg16)
 	{ }
 
-	~Imm8Reg16Param()
+	/*~Imm8Reg16Param()
 	{
 		delete reg16;
-	}
+	}*/
 };
 
 // flagOffset, expectedValue

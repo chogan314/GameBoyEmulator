@@ -21,19 +21,29 @@ class Instruction
 {
 public:
 	Instruction(CPU *processor, std::string mnemonic,
-		int size, int duration, bool isJump);
+		int size, int duration);
 
-	virtual ~Instruction() { }
+	virtual ~Instruction() { processor = nullptr; }
 
 	virtual void Call();
+
+	uchar GetDuration();
+
+	std::string ToString();
+
 protected:
-	std::string mnemonic;
+	
 	// affects memory?
 	// flags affected?
 	uchar size;			// in bytes
 	uchar duration;		// in cpu cycles
-	bool isJump;
+	bool jumped;
 	CPU *processor;
+	int immArg;
+	bool hasImmArg;
+	std::string mnemonic;
+
+	void SetImmArg(int immArg);
 };
 
 /*******************************
@@ -117,6 +127,7 @@ class ParamInstruction : public Instruction
 	friend void LdAddrDecReg16Reg8(ParamInstruction<Reg16Reg8Param> &instruction);		// LD (reg16-), reg8
 	friend void LdAddrImm16Reg8(ParamInstruction<Reg8Param> &instruction);				// LD (imm16), reg8
 	friend void LdReg16Imm16(ParamInstruction<Reg16Param> &instruction);				// LD reg16, imm16
+	friend void LdReg16Reg16(ParamInstruction<Reg16Reg16Param> &instruction);			// LD reg16, reg16
 	friend void LdReg16Reg16AddImm8S(ParamInstruction<Reg16Reg16Param> &instruction);	// LD reg16, reg16 + S-imm8
 	friend void LdAddrImm16Reg16(ParamInstruction<Reg16Param> &instruction);			// LD (imm16), reg16
 	friend void LdHAddrImm8Reg8(ParamInstruction<Reg8Param> &instruction);				// LDH (imm8), reg8
@@ -205,7 +216,7 @@ private:
 template <typename T>
 ParamInstruction<T>::ParamInstruction(CPU *processor, std::string mnemonic,
 		int size, int duration, bool isJump, T params, ParamOnCall<T> onCall) :
-	Instruction(processor, mnemonic, size, duration, isJump),
+	Instruction(processor, mnemonic, size, duration),
 	params(params),
 	onCall(onCall)
 {

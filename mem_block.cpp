@@ -4,7 +4,7 @@ MemBlock::MemBlock(ulong size) :
 	size(size),
 	memory(new uchar[size])
 {
-
+	memset(memory, 0, size);
 }
 
 MemBlock::~MemBlock()
@@ -12,16 +12,17 @@ MemBlock::~MemBlock()
 	delete[] memory;
 }
 
+void MemBlock::CopyFromFile(const std::string &source)
+{
+	FILE *in;
+	in = fopen(source.c_str(), "rb");
+	fread(memory, 1, size, in);
+	fclose(in);
+}
+
 void MemBlock::WriteByte(ulong address, uchar data)
 {
 	memory[address] = data;
-}
-
-
-void MemBlock::WriteShort(ulong address, ushort data)
-{
-	memory[address] = data & 0xff;
-	memory[address + 1] = (data >> 8) & 0xff;
 }
 
 uchar MemBlock::ReadByte(ulong address)
@@ -29,11 +30,7 @@ uchar MemBlock::ReadByte(ulong address)
 	return memory[address];
 }
 
-ushort MemBlock::ReadShort(ulong address)
+bool MemBlock::TestBit(ulong address, uchar offset)
 {
-	ushort data = 0x0000;
-	data = memory[address + 1];
-	data = data << 8;
-	data = data | memory[address];
-	return data;
+	return (memory[address] & (1 << offset)) > 1;
 }
