@@ -1,6 +1,7 @@
 #include "mem_block.h"
+#include <algorithm>
 
-MemBlock::MemBlock(ulong size) :
+MemBlock::MemBlock(uint size) :
 	size(size),
 	memory(new uchar[size])
 {
@@ -20,17 +21,22 @@ void MemBlock::CopyFromFile(const std::string &source)
 	fclose(in);
 }
 
-void MemBlock::WriteByte(ulong address, uchar data)
+void MemBlock::WriteByte(uint address, uchar data)
 {
 	memory[address] = data;
 }
 
-uchar MemBlock::ReadByte(ulong address)
+uchar MemBlock::ReadByte(uint address)
 {
 	return memory[address];
 }
 
-bool MemBlock::TestBit(ulong address, uchar offset)
+uchar *MemBlock::GetMemory()
+{
+	return memory;
+}
+
+bool MemBlock::TestBit(uint address, uchar offset)
 {
 	return (memory[address] & (1 << offset)) > 1;
 }

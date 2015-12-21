@@ -29,6 +29,8 @@ public:
 
 	uchar GetDuration();
 
+	uchar GetSize();
+
 	std::string ToString();
 
 protected:

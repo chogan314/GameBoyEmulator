@@ -1,22 +1,31 @@
 #include "composite_register.h"
 
-ushort &CompositeRegister::GetMemory()
-{
-	return memory;
-}
-
 CReg16Bit::CReg16Bit(ushort &reg) :
 	reg(reg)
 { }
+
+ushort &CReg16Bit::GetMemory()
+{
+	memory = reg;
+	return memory;
+}
+
+void CReg16Bit::Finalize()
+{
+	reg = memory;
+}
 
 CReg8Bit8Bit::CReg8Bit8Bit(uchar &msb, uchar &lsb) :
 	msb(msb),
 	lsb(lsb)
 { }
 
-void CReg16Bit::Finalize()
+ushort &CReg8Bit8Bit::GetMemory()
 {
-	reg = memory;
+	memory = msb;
+	memory <<= 8;
+	memory |= lsb;
+	return memory;
 }
 
 void CReg8Bit8Bit::Finalize()

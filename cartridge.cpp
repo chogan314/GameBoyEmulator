@@ -13,6 +13,9 @@ Cartridge::Cartridge(const std::string &filePath) :
 {
 	memory.CopyFromFile(filePath);
 
+	memoryDirect = memory.GetMemory();
+	RAMBanksDirect = RAMBanks.GetMemory();
+
 	uchar data = memory.ReadByte(0x147);
 
 	switch (data)
@@ -34,17 +37,20 @@ Cartridge::Cartridge(const std::string &filePath) :
 
 uchar Cartridge::ReadFromMemory(ushort address)
 {
-	return memory.ReadByte(address);
+	//return memory.ReadByte(address);
+	return memoryDirect[address];
 }
 
 uchar Cartridge::ReadFromROMBank(ushort address)
 {
-	return memory.ReadByte(address + currentROMBank * 0x4000);
+	//return memory.ReadByte(address + currentROMBank * 0x4000);
+	return memoryDirect[address + currentROMBank * 0x4000];
 }
 
 uchar Cartridge::ReadFromRAM(ushort address)
 {
-	return RAMBanks.ReadByte(address + currentRAMBank * 0x2000);
+	//return RAMBanks.ReadByte(address + currentRAMBank * 0x2000);
+	return RAMBanksDirect[address + currentRAMBank * 0x2000];
 }
 
 void Cartridge::WriteToMemory(ushort address, uchar data)

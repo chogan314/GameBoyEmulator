@@ -4,24 +4,27 @@
 #include <string>
 
 typedef unsigned long ulong;
+typedef unsigned int uint;
 typedef unsigned short ushort;
 typedef unsigned char uchar;
 
 class MemBlock
 {
 public:
-	MemBlock(ulong size);
+	MemBlock(uint size);
 	~MemBlock();
 
 	void CopyFromFile(const std::string &source);
 
-	void WriteByte(ulong address, uchar data);
+	void WriteByte(uint address, uchar data);
 
-	uchar ReadByte(ulong address);
+	uchar ReadByte(uint address);
 
-	bool TestBit(ulong address, uchar offset);
+	uchar *GetMemory();
+
+	bool TestBit(uint address, uchar offset);
 private:
-	ulong size;		// max size = 2^34 bytes
+	uint size;
 	uchar *memory;
 };
 

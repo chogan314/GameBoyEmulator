@@ -19,6 +19,12 @@
     <Filter Include="Source Files\Engine">
       <UniqueIdentifier>{d0f7dff8-d2cd-4008-b975-da7b92dbcb45}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Testing">
+      <UniqueIdentifier>{d2905d2a-7e71-4adc-8e5b-c0e05b24780f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Testing">
+      <UniqueIdentifier>{f07ddd5d-24ce-450d-a16f-1a6c0e9c0391}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cpu.h">
@@ -75,6 +81,12 @@
     <ClInclude Include="sprite_renderer.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="cpu_wrapper.h">
+      <Filter>Header Files\Testing</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu_test_cases.h">
+      <Filter>Header Files\Testing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cpu.cpp">
@@ -121,6 +133,18 @@
     </ClCompile>
     <ClCompile Include="sprite_renderer.cpp">
       <Filter>Source Files\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu.populate_instructions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu_test_cases.cpp">
+      <Filter>Source Files\Testing</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu_wrapper.cpp">
+      <Filter>Source Files\Testing</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu_wrapper.init.cpp">
+      <Filter>Source Files\Testing</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

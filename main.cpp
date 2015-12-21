@@ -3,13 +3,14 @@
 #include "screen.h"
 #include "test_screen.h"
 #include <iostream>
+#include "cpu_test_cases.h"
 
 int main()
 {
 	const GLuint SCREEN_WIDTH = 800;
 	const GLuint SCREEN_HEIGHT = 600;
 
-	const GLfloat updateRate = 1.0f / 120.0f;
+	const GLfloat updateRate = 1.0f / 60.0f;
 
 	Display display(SCREEN_WIDTH, SCREEN_HEIGHT);
 	display.Init();
@@ -61,3 +62,9 @@ int main()
 
 	return 0;
 }
+
+//int main()
+//{
+//	CPUTestCases test;
+//	test.TestOP0x11a();
+//}

@@ -28,10 +28,11 @@ inline HexCharStruct hex(char _c)
 template <typename T>
 std::string int_to_hex(T i)
 {
+	int val = i;
 	std::stringstream stream;
 	stream << "0x"
-		<< std::setfill('0') << std::setw(sizeof(T))
-		<< std::hex << i;
+		<< std::setfill('0') << std::setw(sizeof(int))
+		<< std::hex << val;
 	return stream.str();
 }
 

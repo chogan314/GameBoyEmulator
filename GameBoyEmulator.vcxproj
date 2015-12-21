@@ -82,6 +82,8 @@
     <ClInclude Include="cartridge.h" />
     <ClInclude Include="composite_register.h" />
     <ClInclude Include="cpu.h" />
+    <ClInclude Include="cpu_test_cases.h" />
+    <ClInclude Include="cpu_wrapper.h" />
     <ClInclude Include="display.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="hex_printing.h" />
@@ -102,6 +104,10 @@
     <ClCompile Include="cartridge.cpp" />
     <ClCompile Include="composite_register.cpp" />
     <ClCompile Include="cpu.cpp" />
+    <ClCompile Include="cpu.populate_instructions.cpp" />
+    <ClCompile Include="cpu_test_cases.cpp" />
+    <ClCompile Include="cpu_wrapper.cpp" />
+    <ClCompile Include="cpu_wrapper.init.cpp" />
     <ClCompile Include="display.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="input.cpp" />

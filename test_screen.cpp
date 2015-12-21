@@ -41,7 +41,7 @@ void TestScreen::Render()
 
 	renderer.Draw(screenTexture, glm::vec2(0, 0), width, height);
 
-	//glDrawPixels(160, 144, GL_RGB, GL_UNSIGNED_BYTE, processor->screenData);
+	glDrawPixels(160, 144, GL_RGB, GL_UNSIGNED_BYTE, processor->screenData);
 }
 
 void TestScreen::MakeScreenTexture()

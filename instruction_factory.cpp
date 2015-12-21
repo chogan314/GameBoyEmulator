@@ -43,6 +43,7 @@ void LdReg8AddrReg16(ParamInstruction<Reg16Reg8Param> &instruction)
 // LD reg8, (reg16+)
 void LdReg8AddrIncReg16(ParamInstruction<Reg16Reg8Param> &instruction)
 {
+	ushort val = instruction.params.reg16->GetMemory();
 	instruction.params.reg8 = instruction.processor->ReadByte(instruction.params.reg16->GetMemory());
 
 	instruction.params.reg16->GetMemory()++;
@@ -189,11 +190,11 @@ void IncReg8(ParamInstruction<Reg8Param> &instruction)
 	uchar &reg = instruction.params.reg;
 	CPU *processor = instruction.processor;
 
-	processor->SetZeroFlag(reg + 0x01U == 0x00U);
 	processor->SetSubtractFlag(0);
 	processor->SetHalfCarryFlag((reg & 0x0fU) == 0x0fU);
 
 	reg++;
+	processor->SetZeroFlag(reg == 0x00);
 }
 
 // INC (reg16) ; 8-bit
@@ -202,11 +203,13 @@ void IncAddrReg16(ParamInstruction<Reg16Param> &instruction)
 	uchar memVal = instruction.processor->ReadByte(instruction.params.reg->GetMemory());
 	CPU *processor = instruction.processor;
 
-	processor->SetZeroFlag(memVal + 0x01U == 0x00U);
 	processor->SetSubtractFlag(0);
 	processor->SetHalfCarryFlag((memVal & 0x0fU) == 0x0fU);
 
 	memVal++;
+
+	processor->SetZeroFlag(memVal == 0x00);
+
 	instruction.processor->WriteByte(instruction.params.reg->GetMemory(), memVal);
 }
 
@@ -224,11 +227,12 @@ void DecReg8(ParamInstruction<Reg8Param> &instruction)
 	uchar &reg = instruction.params.reg;
 	CPU *processor = instruction.processor;
 
-	processor->SetZeroFlag(reg - 0x01U == 0x00U);
 	processor->SetSubtractFlag(1);
-	processor->SetHalfCarryFlag((reg & 0x0fU) > 0x00);
+	processor->SetHalfCarryFlag((reg & 0x0fU) == 0x00);
 
 	reg--;
+
+	processor->SetZeroFlag(reg == 0x00U);
 }
 
 // DEC (reg16) ; 8-bit
@@ -237,11 +241,13 @@ void DecAddrReg16(ParamInstruction<Reg16Param> &instruction)
 	uchar memVal = instruction.processor->ReadByte(instruction.params.reg->GetMemory());
 	CPU *processor = instruction.processor;
 
-	processor->SetZeroFlag(memVal - 0x01U == 0x00U);
 	processor->SetSubtractFlag(1);
 	processor->SetHalfCarryFlag((memVal & 0x0fU) > 0x00);
 
 	memVal--;
+
+	processor->SetZeroFlag(memVal == 0x00U);
+
 	instruction.processor->WriteByte(instruction.params.reg->GetMemory(), memVal);
 }
 
@@ -259,12 +265,13 @@ void AddReg8Imm8(ParamInstruction<Reg8Param> &instruction)
 	uchar &reg = instruction.params.reg;
 	uchar imm = instruction.processor->ReadImm8Arg();
 
-	instruction.processor->SetZeroFlag(reg + imm == 0);
 	instruction.processor->SetSubtractFlag(0);
 	instruction.processor->SetHalfCarryFlag((reg & 0x0fU) + (imm & 0x0fU) > 0x0fU);
 	instruction.processor->SetCarryFlag(reg > 0xffU - imm);
 
 	reg += imm;
+
+	instruction.processor->SetZeroFlag(reg == 0);
 
 	instruction.SetImmArg(instruction.processor->ReadImm8Arg());
 }
@@ -275,12 +282,13 @@ void AddReg8Reg8(ParamInstruction<Reg8Reg8Param> &instruction)
 	uchar &lhs = instruction.params.lhs;
 	uchar &rhs = instruction.params.rhs;
 
-	instruction.processor->SetZeroFlag(lhs + rhs == 0);
 	instruction.processor->SetSubtractFlag(0);
 	instruction.processor->SetHalfCarryFlag((lhs & 0x0fU) + (rhs & 0x0fU) > 0x0fU);
 	instruction.processor->SetCarryFlag(lhs > 0xffU - rhs);
 
 	lhs += rhs;
+
+	instruction.processor->SetZeroFlag(lhs == 0);
 }
 
 // ADD reg8, (reg16)
@@ -289,12 +297,13 @@ void AddReg8AddrReg16(ParamInstruction<Reg16Reg8Param> &instruction)
 	uchar &reg = instruction.params.reg8;
 	uchar memVal = instruction.processor->ReadByte(instruction.params.reg16->GetMemory());
 
-	instruction.processor->SetZeroFlag(reg + memVal == 0x00U);
 	instruction.processor->SetSubtractFlag(0);
 	instruction.processor->SetHalfCarryFlag((reg & 0x0fU) + (memVal & 0x0fU) > 0x0fU);
 	instruction.processor->SetCarryFlag(reg > 0xffU - memVal);
 
 	reg += memVal;
+
+	instruction.processor->SetZeroFlag(reg == 0x00U);
 }
 
 // ADD reg16, reg16
@@ -303,8 +312,12 @@ void AddReg16Reg16(ParamInstruction<Reg16Reg16Param> &instruction)
 	ushort &lhs = instruction.params.lhs->GetMemory();
 	ushort &rhs = instruction.params.rhs->GetMemory();
 
+	int total = lhs + rhs;
+	int halfTotal = (lhs & 0xff) + (rhs & 0xff);
+
 	instruction.processor->SetSubtractFlag(0);
-	// TODO: Handle carry flags
+	instruction.processor->SetHalfCarryFlag(halfTotal > 0xff);
+	instruction.processor->SetCarryFlag(total > 0xffff);
 
 	lhs += rhs;
 	instruction.params.lhs->Finalize();
@@ -333,9 +346,8 @@ void AdcReg8Imm8(ParamInstruction<Reg8Param> &instruction)
 {
 	uchar &reg = instruction.params.reg;
 	uchar imm = instruction.processor->ReadImm8Arg();
-	bool carryFlag = instruction.processor->GetCarryFlag();
-
-	instruction.processor->SetZeroFlag(reg + imm + carryFlag == 0x00U);
+	uchar carryFlag = (uchar) instruction.processor->GetCarryFlag();
+	
 	instruction.processor->SetSubtractFlag(0);
 	instruction.processor->SetHalfCarryFlag((reg & 0x0fU) + (imm & 0x0fU) + carryFlag > 0x0fU);
 
@@ -347,6 +359,8 @@ void AdcReg8Imm8(ParamInstruction<Reg8Param> &instruction)
 	reg += imm;
 	reg += carryFlag;
 
+	instruction.processor->SetZeroFlag(reg == 0x00U);
+
 	instruction.SetImmArg(instruction.processor->ReadImm8Arg());
 }
 
@@ -355,9 +369,8 @@ void AdcReg8Reg8(ParamInstruction<Reg8Reg8Param> &instruction)
 {
 	uchar &lhs = instruction.params.lhs;
 	uchar &rhs = instruction.params.rhs;
-	bool carryFlag = instruction.processor->GetCarryFlag();
-
-	instruction.processor->SetZeroFlag(lhs + rhs + carryFlag == 0x00U);
+	uchar carryFlag = (uchar) instruction.processor->GetCarryFlag();
+	
 	instruction.processor->SetSubtractFlag(0);
 	instruction.processor->SetHalfCarryFlag((lhs & 0x0fU) + (rhs & 0x0fU) + carryFlag > 0x0fU);
 
@@ -368,6 +381,8 @@ void AdcReg8Reg8(ParamInstruction<Reg8Reg8Param> &instruction)
 
 	lhs += rhs;
 	lhs += carryFlag;
+
+	instruction.processor->SetZeroFlag(lhs == 0x00U);
 }
 
 // ADC reg8, (reg16)
@@ -377,7 +392,6 @@ void AdcReg8AddrReg16(ParamInstruction<Reg16Reg8Param> &instruction)
 	uchar memVal = instruction.processor->ReadByte(instruction.params.reg16->GetMemory());
 	bool carryFlag = instruction.processor->GetCarryFlag();
 
-	instruction.processor->SetZeroFlag(reg + memVal + carryFlag == 0x00U);
 	instruction.processor->SetSubtractFlag(0);
 	instruction.processor->SetHalfCarryFlag((reg & 0x0fU) + (memVal & 0x0fU) + carryFlag > 0x0fU);
 
@@ -388,6 +402,8 @@ void AdcReg8AddrReg16(ParamInstruction<Reg16Reg8Param> &instruction)
 
 	reg += memVal;
 	reg += carryFlag;
+
+	instruction.processor->SetZeroFlag(reg == 0x00U);
 }
 
 
@@ -397,12 +413,13 @@ void SubImm8(NoParamInstruction &instruction)
 	uchar &acc = instruction.processor->A;
 	uchar imm = instruction.processor->ReadImm8Arg();
 
-	instruction.processor->SetZeroFlag(acc - imm == 0);
 	instruction.processor->SetSubtractFlag(1);
 	instruction.processor->SetHalfCarryFlag((acc & 0x0fU) < (imm &0x0fU));
 	instruction.processor->SetCarryFlag(acc < imm);
 
 	acc -= imm;
+
+	instruction.processor->SetZeroFlag(acc == 0);
 
 	instruction.SetImmArg(instruction.processor->ReadImm8Arg());
 }
@@ -413,12 +430,13 @@ void SubReg8(ParamInstruction<Reg8Param> &instruction)
 	uchar &acc = instruction.processor->A;
 	uchar &reg = instruction.params.reg;
 
-	instruction.processor->SetZeroFlag(acc - reg == 0);
 	instruction.processor->SetSubtractFlag(1);
 	instruction.processor->SetHalfCarryFlag((acc & 0x0fU) < (reg & 0x0fU));
 	instruction.processor->SetCarryFlag(acc < reg);
 
 	acc -= reg;
+
+	instruction.processor->SetZeroFlag(acc == 0);
 }
 
 // SUB (reg16)
@@ -427,12 +445,13 @@ void SubAddrReg16(ParamInstruction<Reg16Param> &instruction)
 	uchar &acc = instruction.processor->A;
 	uchar memVal = instruction.processor->ReadByte(instruction.params.reg->GetMemory());
 
-	instruction.processor->SetZeroFlag(acc - memVal == 0);
 	instruction.processor->SetSubtractFlag(1);
 	instruction.processor->SetHalfCarryFlag((acc & 0x0fU) < (memVal & 0x0fU));
 	instruction.processor->SetCarryFlag(acc < memVal);
 
 	acc -= memVal;
+
+	instruction.processor->SetZeroFlag(acc == 0);
 }
 
 
@@ -443,7 +462,6 @@ void SbcReg8Imm8(ParamInstruction<Reg8Param> &instruction)
 	uchar imm = instruction.processor->ReadImm8Arg();
 	bool carryFlag = instruction.processor->GetCarryFlag();
 
-	instruction.processor->SetZeroFlag(reg - imm - carryFlag == 0);
 	instruction.processor->SetSubtractFlag(1);
 	instruction.processor->SetHalfCarryFlag((reg & 0x0fU) < (imm & 0x0fU) + carryFlag);
 
@@ -455,6 +473,8 @@ void SbcReg8Imm8(ParamInstruction<Reg8Param> &instruction)
 	reg -= imm;
 	reg -= carryFlag;
 
+	instruction.processor->SetZeroFlag(reg == 0);
+
 	instruction.SetImmArg(instruction.processor->ReadImm8Arg());
 }
 
@@ -465,7 +485,6 @@ void SbcReg8Reg8(ParamInstruction<Reg8Reg8Param> &instruction)
 	uchar &rhs = instruction.params.rhs;
 	bool carryFlag = instruction.processor->GetCarryFlag();
 
-	instruction.processor->SetZeroFlag(lhs - rhs - carryFlag == 0);
 	instruction.processor->SetSubtractFlag(1);
 	instruction.processor->SetHalfCarryFlag((lhs & 0x0fU) < (rhs & 0x0fU) + carryFlag);
 
@@ -476,6 +495,8 @@ void SbcReg8Reg8(ParamInstruction<Reg8Reg8Param> &instruction)
 
 	lhs -= rhs;
 	lhs -= carryFlag;
+
+	instruction.processor->SetZeroFlag(lhs == 0);
 }
 
 // SBC reg8, (reg16)
@@ -485,7 +506,6 @@ void SbcReg8AddrReg16(ParamInstruction<Reg16Reg8Param> &instruction)
 	uchar memVal = instruction.processor->ReadByte(instruction.params.reg16->GetMemory());
 	bool carryFlag = instruction.processor->GetCarryFlag();
 
-	instruction.processor->SetZeroFlag(reg - memVal - carryFlag == 0);
 	instruction.processor->SetSubtractFlag(1);
 	instruction.processor->SetHalfCarryFlag((reg & 0x0fU) < (memVal & 0x0fU) + carryFlag);
 
@@ -496,6 +516,8 @@ void SbcReg8AddrReg16(ParamInstruction<Reg16Reg8Param> &instruction)
 
 	reg -= memVal;
 	reg -= carryFlag;
+
+	instruction.processor->SetZeroFlag(reg == 0);
 }
 
 
@@ -505,12 +527,13 @@ void AndImm8(NoParamInstruction &instruction)
 	uchar &acc = instruction.processor->A;
 	uchar imm = instruction.processor->ReadImm8Arg();
 
-	instruction.processor->SetZeroFlag((acc & imm) == 0x00U);
 	instruction.processor->SetSubtractFlag(0);
 	instruction.processor->SetHalfCarryFlag(1);
 	instruction.processor->SetCarryFlag(0);
 
 	acc &= imm;
+
+	instruction.processor->SetZeroFlag(acc == 0x00U);
 
 	instruction.SetImmArg(instruction.processor->ReadImm8Arg());
 }
@@ -521,12 +544,13 @@ void AndReg8(ParamInstruction<Reg8Param> &instruction)
 	uchar &acc = instruction.processor->A;
 	uchar &reg = instruction.params.reg;
 
-	instruction.processor->SetZeroFlag((acc & reg) == 0x00U);
 	instruction.processor->SetSubtractFlag(0);
 	instruction.processor->SetHalfCarryFlag(1);
 	instruction.processor->SetCarryFlag(0);
 
 	acc &= reg;
+
+	instruction.processor->SetZeroFlag(acc == 0x00U);
 }
 
 // AND (reg16)
@@ -535,12 +559,13 @@ void AndAddrReg16(ParamInstruction<Reg16Param> &instruction)
 	uchar &acc = instruction.processor->A;
 	uchar memVal = instruction.processor->ReadByte(instruction.params.reg->GetMemory());
 
-	instruction.processor->SetZeroFlag((acc & memVal) == 0x00U);
 	instruction.processor->SetSubtractFlag(0);
 	instruction.processor->SetHalfCarryFlag(1);
 	instruction.processor->SetCarryFlag(0);
 
 	acc &= memVal;
+
+	instruction.processor->SetZeroFlag(acc == 0x00U);
 }
 
 
@@ -550,12 +575,13 @@ void XorImm8(NoParamInstruction &instruction)
 	uchar &acc = instruction.processor->A;
 	uchar imm = instruction.processor->ReadImm8Arg();
 
-	instruction.processor->SetZeroFlag((acc ^ imm) == 0x00U);
 	instruction.processor->SetSubtractFlag(0);
 	instruction.processor->SetHalfCarryFlag(0);
 	instruction.processor->SetCarryFlag(0);
 
 	acc ^= imm;
+
+	instruction.processor->SetZeroFlag(acc == 0x00U);
 
 	instruction.SetImmArg(instruction.processor->ReadImm8Arg());
 }
@@ -566,12 +592,13 @@ void XorReg8(ParamInstruction<Reg8Param> &instruction)
 	uchar &acc = instruction.processor->A;
 	uchar &reg = instruction.params.reg;
 
-	instruction.processor->SetZeroFlag((acc ^ reg) == 0x00U);
 	instruction.processor->SetSubtractFlag(0);
 	instruction.processor->SetHalfCarryFlag(0);
 	instruction.processor->SetCarryFlag(0);
 
 	acc ^= reg;
+
+	instruction.processor->SetZeroFlag(acc == 0x00U);
 }
 
 // XOR (reg16)
@@ -580,12 +607,12 @@ void XorAddrReg16(ParamInstruction<Reg16Param> &instruction)
 	uchar &acc = instruction.processor->A;
 	uchar memVal = instruction.processor->ReadByte(instruction.params.reg->GetMemory());
 
-	instruction.processor->SetZeroFlag((acc ^ memVal) == 0x00U);
 	instruction.processor->SetSubtractFlag(0);
 	instruction.processor->SetHalfCarryFlag(0);
 	instruction.processor->SetCarryFlag(0);
 
 	acc ^= memVal;
+	instruction.processor->SetZeroFlag(acc == 0x00U);
 }
 
 
@@ -595,12 +622,13 @@ void OrImm8(NoParamInstruction &instruction)
 	uchar &acc = instruction.processor->A;
 	uchar imm = instruction.processor->ReadImm8Arg();
 
-	instruction.processor->SetZeroFlag((acc | imm) == 0x00U);
 	instruction.processor->SetSubtractFlag(0);
 	instruction.processor->SetHalfCarryFlag(0);
 	instruction.processor->SetCarryFlag(0);
 
 	acc |= imm;
+
+	instruction.processor->SetZeroFlag(acc == 0x00U);
 
 	instruction.SetImmArg(instruction.processor->ReadImm8Arg());
 }
@@ -611,12 +639,13 @@ void OrReg8(ParamInstruction<Reg8Param> &instruction)
 	uchar &acc = instruction.processor->A;
 	uchar &reg = instruction.params.reg;
 
-	instruction.processor->SetZeroFlag((acc | reg) == 0x00U);
 	instruction.processor->SetSubtractFlag(0);
 	instruction.processor->SetHalfCarryFlag(0);
 	instruction.processor->SetCarryFlag(0);
 
 	acc |= reg;
+
+	instruction.processor->SetZeroFlag(acc == 0x00U);
 }
 
 // OR (reg16)
@@ -625,12 +654,13 @@ void OrAddrReg16(ParamInstruction<Reg16Param> &instruction)
 	uchar &acc = instruction.processor->A;
 	uchar memVal = instruction.processor->ReadByte(instruction.params.reg->GetMemory());
 
-	instruction.processor->SetZeroFlag((acc | memVal) == 0x00U);
 	instruction.processor->SetSubtractFlag(0);
 	instruction.processor->SetHalfCarryFlag(0);
 	instruction.processor->SetCarryFlag(0);
 
 	acc |= memVal;
+
+	instruction.processor->SetZeroFlag(acc == 0x00U);
 }
 
 
@@ -639,14 +669,6 @@ void CpImm8(NoParamInstruction &instruction)
 {
 	uchar &acc = instruction.processor->A;
 	uchar imm = instruction.processor->ReadImm8Arg();
-
-	/*std::cout << hex(imm) << std::endl;
-	std::cout << hex(acc) << std::endl;*/
-
-	if (instruction.processor->A == 0x80)
-	{
-		std::cout << "lksjdflakjsfd" << std::endl;
-	}
 
 	instruction.processor->SetZeroFlag(acc - imm == 0);
 	instruction.processor->SetSubtractFlag(1);
@@ -764,7 +786,7 @@ void RRA(NoParamInstruction &instruction)
 	uchar &A = instruction.processor->A;
 	uchar rightmostBit = (A & 1);
 	A = A >> 1;
-	A |= ((uchar) instruction.processor->GetCarryFlag() << 7);
+	A |= (((uchar) instruction.processor->GetCarryFlag()) << 7);
 
 	instruction.processor->SetZeroFlag(A == 0x00U);
 	instruction.processor->SetSubtractFlag(0);
@@ -1123,15 +1145,11 @@ void JrCondImm8S(ParamInstruction<ConditionalParam> &instruction)
 // JP imm16
 void JpImm16(NoParamInstruction &instruction)
 {
-	std::cout << int_to_hex(instruction.processor->PC) << std::endl;
-	std::cout << int_to_hex(instruction.processor->ReadImm16Arg()) << std::endl;
-
-	ushort data = instruction.processor->ReadImm16Arg();
-	int data2 = data;
-
-	instruction.processor->PC = instruction.processor->ReadImm16Arg();
+	ushort imm16 = instruction.processor->ReadImm16Arg();
+	instruction.processor->PC = imm16;
 	instruction.jumped = true;
-	instruction.SetImmArg(data2);
+
+	instruction.SetImmArg(imm16);
 }
 
 // JP CONDITION, imm16
@@ -1139,6 +1157,8 @@ void JpCondImm16(ParamInstruction<ConditionalParam> &instruction)
 {
 	uchar mask = 1 << instruction.params.flagOffset;
 	bool set = (instruction.processor->F & mask) != 0;
+
+	instruction.SetImmArg(instruction.processor->ReadImm16Arg());
 
 	if (set == instruction.params.expectedValue)
 	{
@@ -1151,8 +1171,6 @@ void JpCondImm16(ParamInstruction<ConditionalParam> &instruction)
 		instruction.duration = 12;
 		instruction.jumped = false;
 	}
-
-	instruction.SetImmArg(instruction.processor->ReadImm16Arg());
 }
 
 // JP (reg16)
@@ -1166,11 +1184,12 @@ void JpAddrReg16(ParamInstruction<Reg16Param> &instruction)
 // CALL imm16
 void CallImm16(NoParamInstruction &instruction)
 {
-	instruction.processor->PushShort(instruction.processor->PC);
+	instruction.processor->PushShort(instruction.processor->PC + instruction.size);
+
+	instruction.SetImmArg(instruction.processor->ReadImm16Arg());
 
 	instruction.processor->PC = instruction.processor->ReadImm16Arg();
 	instruction.jumped = true;
-	instruction.SetImmArg(instruction.processor->ReadImm8Arg());
 }
 
 // CALL CONDITION, imm16
@@ -1181,7 +1200,9 @@ void CallCondImm16(ParamInstruction<ConditionalParam> &instruction)
 
 	if (set == instruction.params.expectedValue)
 	{
-		instruction.processor->PushShort(instruction.processor->PC);
+		instruction.processor->PushShort(instruction.processor->PC + instruction.size);
+
+		instruction.SetImmArg(instruction.processor->ReadImm16Arg());
 
 		instruction.processor->PC = instruction.processor->ReadImm16Arg();
 
@@ -1190,11 +1211,10 @@ void CallCondImm16(ParamInstruction<ConditionalParam> &instruction)
 	}
 	else
 	{
+		instruction.SetImmArg(instruction.processor->ReadImm16Arg());
 		instruction.duration = 12;
 		instruction.jumped = false;
 	}
-
-	instruction.SetImmArg(instruction.processor->ReadImm8Arg());
 }
 
 
@@ -1276,13 +1296,13 @@ void PrefixCB(NoParamInstruction &instruction)
 // DI
 void DI(NoParamInstruction &instruction)
 {
-	// TODO
+	instruction.processor->shouldDisableInterrupts = true;
 }
 
 // EI
 void EI(NoParamInstruction &instruction)
 {
-	// TODO
+	instruction.processor->shouldEnableInterrupts = true;
 }
 
 
@@ -1412,7 +1432,7 @@ Instruction *InstructionFactory::MakeLdReg16Reg16AddImm8S(CompositeRegister *lhs
 Instruction *InstructionFactory::MakeLdAddrImm16Reg16(CompositeRegister *reg16, const std::string &mnemonic)
 {
 	Reg16Param param(reg16);
-	return new ParamInstruction<Reg16Param>(processor, mnemonic, 3, 16, false, param, LdAddrImm16Reg16);
+	return new ParamInstruction<Reg16Param>(processor, mnemonic, 3, 20, false, param, LdAddrImm16Reg16);
 }
 
 
@@ -1762,7 +1782,7 @@ Instruction *InstructionFactory::MakeRrcAddrReg16(CompositeRegister *reg16, cons
 Instruction *InstructionFactory::MakeRlReg8(uchar &reg8, const std::string &mnemonic)
 {
 	Reg8Param param(reg8);
-	return new ParamInstruction<Reg8Param>(processor, mnemonic, 2, 16, false, param, RlReg8);
+	return new ParamInstruction<Reg8Param>(processor, mnemonic, 2, 8, false, param, RlReg8);
 }
 
 // RL (reg16)

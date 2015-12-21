@@ -28,7 +28,9 @@ public:
 
 private:
 	MemBlock memory;
+	uchar *memoryDirect;
 	MemBlock RAMBanks;
+	uchar *RAMBanksDirect;
 	CartType cartType;
 	uchar currentROMBank;
 	uchar currentRAMBank;

@@ -25,6 +25,7 @@ class CPU
 
 	friend class Instruction;
 	friend class InstructionFactory;
+	friend class CPUWrapper;
 
 	// INSTRUCTION onCall FUNCTIONS:
 
@@ -173,6 +174,8 @@ public:
 
 
 	void PrintInstructions();
+	void PrintMemory();
+	void PrintRegisters();
 
 private:
 	const ushort TIMA = 0xFF05;
@@ -197,10 +200,13 @@ private:
 	ushort PC;		// program counter
 
 	bool interruptMasterEnable;
+	bool shouldEnableInterrupts;
+	bool shouldDisableInterrupts;
 
 	Instruction *instructions[512];
 
 	MemBlock *memory;
+	uchar *memoryDirect;
 
 	Cartridge *cartridge;
 
@@ -211,6 +217,8 @@ private:
 
 	bool disableIMEAfterNextInstruction;
 	bool enableIMEAfterNextInstruction;
+
+	unsigned long instrCounter = 0;
 
 	Instruction *InvokeInstruction(int index);
 

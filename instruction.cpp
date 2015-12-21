@@ -23,6 +23,11 @@ uchar Instruction::GetDuration()
 	return duration;
 }
 
+uchar Instruction::GetSize()
+{
+	return size;
+}
+
 void Instruction::Call()
 {
 	processor->PC += size * (int) !jumped;
